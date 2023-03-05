@@ -61,23 +61,28 @@ export default function Home() {
 
   if (!connected)
     return (
-      <main>
-        <div
-          style={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <p style={{ marginBottom: "var(--space-4)" }}>
-            <strong>NO CONNECTION</strong>
-          </p>
-          <button onClick={() => window.location.reload()}>RELOAD</button>
-        </div>
-      </main>
+      <>
+        <Head>
+          <title>No connection</title>
+        </Head>
+        <main>
+          <div
+            style={{
+              width: "100vw",
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <p style={{ marginBottom: "var(--space-4)" }}>
+              <strong>NO CONNECTION</strong>
+            </p>
+            <button onClick={() => window.location.reload()}>RELOAD</button>
+          </div>
+        </main>
+      </>
     );
 
   const {
@@ -97,23 +102,28 @@ export default function Home() {
 
   if (!Heartbeat)
     return (
-      <main>
-        <div
-          style={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <p style={{ marginBottom: "var(--space-4)" }}>
-            <strong>NO SESSION</strong>
-          </p>
-          <p>Come back later when there is a live session</p>
-        </div>
-      </main>
+      <>
+        <Head>
+          <title>No session</title>
+        </Head>
+        <main>
+          <div
+            style={{
+              width: "100vw",
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <p style={{ marginBottom: "var(--space-4)" }}>
+              <strong>NO SESSION</strong>
+            </p>
+            <p>Come back later when there is a live session</p>
+          </div>
+        </main>
+      </>
     );
 
   return (
@@ -145,7 +155,8 @@ export default function Home() {
                 <>
                   <p style={{ marginRight: "var(--space-4)" }}>
                     {SessionInfo.Meeting.OfficialName},{" "}
-                    {SessionInfo.Meeting.Circuit.ShortName}
+                    {SessionInfo.Meeting.Circuit.ShortName},{" "}
+                    {SessionInfo.Meeting.Country.Name}
                   </p>
                   <p style={{ marginRight: "var(--space-4)" }}>
                     Session {SessionInfo.Name}
@@ -169,9 +180,18 @@ export default function Home() {
               }}
             >
               <p style={{ marginRight: "var(--space-4)" }}>
-                Updated {moment(Heartbeat.Utc).format("HH:mm:ss")}
+                Data updated {moment(Heartbeat.Utc).format("HH:mm:ss")}
               </p>
-              <p style={{ color: "green" }}>CONNECTED</p>
+              <p style={{ color: "green", marginRight: "var(--space-4)" }}>
+                CONNECTED
+              </p>
+              <a
+                href="https://github.com/tdjsnelling/monaco"
+                target="_blank"
+                style={{ color: "grey" }}
+              >
+                tdjsnelling/monaco
+              </a>
             </div>
           </div>
 
@@ -364,7 +384,7 @@ export default function Home() {
                         <>
                           <span>
                             {line.BestLapTime.Value}
-                            {pos > 0 && (
+                            {pos > 0 ? (
                               <>
                                 {!!line.Stats[line.Stats.length - 1]
                                   .TimeDiffToFastest && (
@@ -392,6 +412,13 @@ export default function Home() {
                                     </span>
                                   </>
                                 )}
+                              </>
+                            ) : (
+                              <>
+                                <br />
+                                <span style={{ color: "grey" }}>—</span>
+                                <br />
+                                <span style={{ color: "grey" }}>—</span>
                               </>
                             )}
                           </span>
