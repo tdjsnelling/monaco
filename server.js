@@ -2,6 +2,7 @@ const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");
 const ws = require("ws");
+const zlib = require("zlib");
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -22,58 +23,81 @@ const setupStream = async () => {
   const cookie = negotiation.headers.get("set-cookie");
   const { ConnectionToken } = await negotiation.json();
 
-  const socket = new ws(
-    `wss://${URL}/signalr/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodeURIComponent(
-      ConnectionToken
-    )}&connectionData=${hub}`,
-    [],
-    {
-      headers: {
-        "User-Agent": "BestHTTP",
-        "Accept-Encoding": "gzip,identity",
-        Cookie: cookie,
-      },
-    }
-  );
-
-  socket.on("open", () => {
-    socket.send(
-      JSON.stringify({
-        H: HUB,
-        M: "Subscribe",
-        A: [
-          [
-            "Heartbeat",
-            "CarData.z",
-            "Position.z",
-            "ExtrapolatedClock",
-            "TopThree",
-            "RcmSeries",
-            "TimingStats",
-            "TimingAppData",
-            "WeatherData",
-            "TrackStatus",
-            "DriverList",
-            "RaceControlMessages",
-            "SessionInfo",
-            "SessionData",
-            "LapCount",
-            "TimingData",
-          ],
-        ],
-        I: 1,
-      })
+  if (cookie && ConnectionToken) {
+    const socket = new ws(
+      `wss://${URL}/signalr/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodeURIComponent(
+        ConnectionToken
+      )}&connectionData=${hub}`,
+      [],
+      {
+        headers: {
+          "User-Agent": "BestHTTP",
+          "Accept-Encoding": "gzip,identity",
+          Cookie: cookie,
+        },
+      }
     );
-  });
 
-  socket.on("message", (data, binary) => {
-    console.log(data.toString());
-    wss.clients.forEach((s) => {
-      if (s.readyState === ws.OPEN) {
-        s.send(data, { binary });
+    socket.on("open", () => {
+      socket.send(
+        JSON.stringify({
+          H: HUB,
+          M: "Subscribe",
+          A: [
+            [
+              "Heartbeat",
+              "CarData.z",
+              "Position.z",
+              "ExtrapolatedClock",
+              "TopThree",
+              "RcmSeries",
+              "TimingStats",
+              "TimingAppData",
+              "WeatherData",
+              "TrackStatus",
+              "DriverList",
+              "RaceControlMessages",
+              "SessionInfo",
+              "SessionData",
+              "LapCount",
+              "TimingData",
+            ],
+          ],
+          I: 1,
+        })
+      );
+    });
+
+    socket.on("message", (data) => {
+      try {
+        const parsed = JSON.parse(data.toString());
+
+        if (parsed.R["CarData.z"]) {
+          parsed.R.CarData = JSON.parse(
+            zlib
+              .inflateRawSync(Buffer.from(parsed.R["CarData.z"], "base64"))
+              .toString()
+          );
+        }
+
+        if (parsed.R["Position.z"]) {
+          parsed.R.Position = JSON.parse(
+            zlib
+              .inflateRawSync(Buffer.from(parsed.R["Position.z"], "base64"))
+              .toString()
+          );
+        }
+
+        wss.clients.forEach((s) => {
+          if (s.readyState === ws.OPEN) {
+            s.send(data);
+          }
+        });
+      } catch (e) {
+        console.error(`could not send message: ${e}`);
       }
     });
-  });
+  }
 };
 
 app.prepare().then(async () => {

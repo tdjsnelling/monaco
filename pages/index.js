@@ -22,7 +22,7 @@ export default function Home() {
       retry.current = undefined;
     }
 
-    const ws = new WebSocket("ws://localhost:3001");
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
 
     ws.addEventListener("open", () => {
       setConnected(true);
@@ -59,6 +59,27 @@ export default function Home() {
     }
   });
 
+  if (!connected)
+    return (
+      <main>
+        <div
+          style={{
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p style={{ marginBottom: "var(--space-4)" }}>
+            <strong>NO CONNECTION</strong>
+          </p>
+          <button onClick={() => window.location.reload()}>RELOAD</button>
+        </div>
+      </main>
+    );
+
   const {
     Heartbeat,
     SessionInfo,
@@ -70,7 +91,30 @@ export default function Home() {
     RaceControlMessages,
     TimingData,
     TimingAppData,
+    CarData,
+    Position,
   } = liveState;
+
+  if (!Heartbeat)
+    return (
+      <main>
+        <div
+          style={{
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p style={{ marginBottom: "var(--space-4)" }}>
+            <strong>NO SESSION</strong>
+          </p>
+          <p>Come back later when there is a live session</p>
+        </div>
+      </main>
+    );
 
   return (
     <>
@@ -83,91 +127,75 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <main>
-        {!connected ? (
+        <>
           <div
             style={{
-              width: "100vw",
-              height: "100vh",
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              justifyContent: "space-between",
+              padding: "var(--space-3)",
+              borderBottom: "1px solid var(--colour-border)",
             }}
           >
-            <p style={{ marginBottom: "var(--space-4)" }}>no connection</p>
-            <button onClick={() => window.location.reload()}>reload</button>
-          </div>
-        ) : (
-          <>
             <div
               style={{
                 display: "flex",
-                justifyContent: "space-between",
+              }}
+            >
+              {!!SessionInfo && (
+                <>
+                  <p style={{ marginRight: "var(--space-4)" }}>
+                    {SessionInfo.Meeting.OfficialName},{" "}
+                    {SessionInfo.Meeting.Circuit.ShortName}
+                  </p>
+                  <p style={{ marginRight: "var(--space-4)" }}>
+                    Session {SessionInfo.Name}
+                  </p>
+                </>
+              )}
+              {!!TrackStatus && (
+                <p style={{ marginRight: "var(--space-4)" }}>
+                  Status {TrackStatus.Message}
+                </p>
+              )}
+              {!!ExtrapolatedClock && (
+                <p style={{ marginRight: "var(--space-4)" }}>
+                  Remaining {ExtrapolatedClock.Remaining}
+                </p>
+              )}
+            </div>
+            <div
+              style={{
+                display: "flex",
+              }}
+            >
+              <p style={{ marginRight: "var(--space-4)" }}>
+                Updated {moment(Heartbeat.Utc).format("HH:mm:ss")}
+              </p>
+              <p style={{ color: "green" }}>CONNECTED</p>
+            </div>
+          </div>
+
+          {!!WeatherData && (
+            <div
+              style={{
+                display: "flex",
                 padding: "var(--space-3)",
                 borderBottom: "1px solid var(--colour-border)",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                }}
-              >
-                {!!SessionInfo && (
-                  <>
-                    <p style={{ marginRight: "var(--space-4)" }}>
-                      {SessionInfo.Meeting.OfficialName},{" "}
-                      {SessionInfo.Meeting.Circuit.ShortName}
-                    </p>
-                    <p style={{ marginRight: "var(--space-4)" }}>
-                      Session {SessionInfo.Name}
-                    </p>
-                  </>
-                )}
-                {!!TrackStatus && (
-                  <p style={{ marginRight: "var(--space-4)" }}>
-                    Status {TrackStatus.Message}
+              {Object.entries(WeatherData).map(([k, v]) =>
+                k !== "_kf" ? (
+                  <p
+                    key={`weather-${k}`}
+                    style={{ marginRight: "var(--space-4)" }}
+                  >
+                    {k} {v}
                   </p>
-                )}
-                {!!ExtrapolatedClock && (
-                  <p style={{ marginRight: "var(--space-4)" }}>
-                    Remaining {ExtrapolatedClock.Remaining}
-                  </p>
-                )}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                }}
-              >
-                <p style={{ marginRight: "var(--space-4)" }}>
-                  Updated {moment(Heartbeat.Utc).format("HH:mm:ss")}
-                </p>
-                <p style={{ color: "green" }}>CONNECTED</p>
-              </div>
+                ) : null
+              )}
             </div>
-
-            {!!WeatherData && (
-              <div
-                style={{
-                  display: "flex",
-                  padding: "var(--space-3)",
-                  borderBottom: "1px solid var(--colour-border)",
-                }}
-              >
-                {Object.entries(WeatherData).map(([k, v]) =>
-                  k !== "_kf" ? (
-                    <p
-                      key={`weather-${k}`}
-                      style={{ marginRight: "var(--space-4)" }}
-                    >
-                      {k} {v}
-                    </p>
-                  ) : null
-                )}
-              </div>
-            )}
-          </>
-        )}
+          )}
+        </>
 
         <div
           style={{
@@ -282,23 +310,13 @@ export default function Home() {
                     >
                       {moment(event.Utc).format("HH:mm:ss")}
                     </span>
-                    {Object.entries(event).map(([k, v]) =>
-                      k !== "Utc" ? (
-                        <span
-                          key={`race-control-${event.Utc}-${k}`}
-                          style={{ marginRight: "var(--space-4)" }}
-                        >
-                          {k} {v}
-                        </span>
-                      ) : null
-                    )}
+                    <span>{event.Message}</span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
         </div>
-
         <div
           style={{
             borderBottom: "1px solid var(--colour-border)",
@@ -344,7 +362,39 @@ export default function Home() {
                       </span>
                       {SessionInfo.Name === "Qualifying" && (
                         <>
-                          <span>{line.BestLapTime.Value}</span>
+                          <span>
+                            {line.BestLapTime.Value}
+                            {pos > 0 && (
+                              <>
+                                {!!line.Stats[line.Stats.length - 1]
+                                  .TimeDiffToFastest && (
+                                  <>
+                                    <br />
+                                    <span style={{ color: "grey" }}>
+                                      P1{" "}
+                                      {
+                                        line.Stats[line.Stats.length - 1]
+                                          .TimeDiffToFastest
+                                      }
+                                    </span>
+                                  </>
+                                )}
+                                {!!line.Stats[line.Stats.length - 1]
+                                  .TimeDifftoPositionAhead && (
+                                  <>
+                                    <br />
+                                    <span style={{ color: "grey" }}>
+                                      P{pos}{" "}
+                                      {
+                                        line.Stats[line.Stats.length - 1]
+                                          .TimeDifftoPositionAhead
+                                      }
+                                    </span>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </span>
                           {line.Sectors.map((sector, i) => (
                             <span
                               key={`timing-data-${line.RacingNumber}-sector-${i}`}
@@ -356,28 +406,7 @@ export default function Home() {
                                   : "var(--colour-fg)",
                               }}
                             >
-                              {sector.Value || sector.PreviousValue}{" "}
-                              {pos > 0 && (
-                                <>
-                                  {!!line.Stats[i].TimeDiffToFastest && (
-                                    <>
-                                      <br />
-                                      <span style={{ color: "grey" }}>
-                                        P1 {line.Stats[i].TimeDiffToFastest}
-                                      </span>
-                                    </>
-                                  )}
-                                  {!!line.Stats[i].TimeDifftoPositionAhead && (
-                                    <>
-                                      <br />
-                                      <span style={{ color: "grey" }}>
-                                        P{pos}{" "}
-                                        {line.Stats[i].TimeDifftoPositionAhead}
-                                      </span>
-                                    </>
-                                  )}
-                                </>
-                              )}
+                              S{i + 1} {sector.Value || sector.PreviousValue}
                             </span>
                           ))}
                           <span>{bestLapTire}</span>
