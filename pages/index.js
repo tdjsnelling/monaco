@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import moment from "moment";
-import mock from "../mock.json";
 
 const sortPosition = (a, b) => {
   const aPos = Number(a.Position);
@@ -10,6 +9,22 @@ const sortPosition = (a, b) => {
 };
 
 const drsEnabledValues = [8, 10, 12, 14];
+
+// one of 2048, 2064, 2051, 2049
+const getSegmentColour = (status) => {
+  switch (status) {
+    case 2048:
+      return "yellow";
+    case 2049:
+      return "limegreen";
+    case 2051:
+      return "magenta";
+    case 2064:
+      return "blue";
+    default:
+      return "var(--colour-offset)";
+  }
+};
 
 export default function Home() {
   const [connected, setConnected] = useState(false);
@@ -262,6 +277,10 @@ export default function Home() {
                   const throttlePercent = Math.min(100, carData["4"]);
                   const brakeApplied = carData["5"] > 0;
 
+                  const appData = TimingAppData.Lines[line.RacingNumber];
+                  const currentStint =
+                    appData.Stints[appData.Stints.length - 1];
+
                   return (
                     <li
                       key={`timing-data-${line.RacingNumber}`}
@@ -274,19 +293,37 @@ export default function Home() {
                             : undefined,
                         display: "grid",
                         gridTemplateColumns:
-                          "25px 48px 75px 75px 25px 105px 90px repeat(10, 75px)",
+                          "25px 48px 75px 75px 25px 105px 80px 10px 45px 260px repeat(10, 75px)",
                         gridGap: "var(--space-4)",
                         alignItems: "center",
+                        opacity: line.Retired || line.Stopped ? 0.4 : 1,
                       }}
                     >
-                      <span>P{line.Position}</span>
+                      <span>
+                        P{line.Position}
+                        <br />
+                        {Number(appData.GridPos) >= Number(line.Position) &&
+                          "+"}
+                        {Number(appData.GridPos) - Number(line.Position)}
+                      </span>
                       <span
                         style={{
-                          color: `#${driver.TeamColour}`,
                           textAlign: "right",
                         }}
                       >
-                        {line.RacingNumber} {driver.Tla}
+                        <span style={{ color: `#${driver.TeamColour}` }}>
+                          {line.RacingNumber} {driver.Tla}
+                        </span>
+                        <br />
+                        {line.Retired
+                          ? "RETIRED"
+                          : line.Stopped
+                          ? "STOPPED"
+                          : line.InPit
+                          ? "PIT"
+                          : line.PitOut
+                          ? "PIT OUT"
+                          : null}
                       </span>
                       <span>
                         {carData["0"].toString()}
@@ -295,7 +332,7 @@ export default function Home() {
                           style={{
                             display: "block",
                             width: "100%",
-                            height: "2px",
+                            height: "4px",
                             backgroundColor: "var(--colour-border)",
                             margin: "var(--space-2) 0",
                           }}
@@ -304,7 +341,7 @@ export default function Home() {
                             style={{
                               display: "block",
                               width: `${rpmPercent}%`,
-                              height: "2px",
+                              height: "4px",
                               backgroundColor: "cyan",
                             }}
                           />
@@ -318,7 +355,7 @@ export default function Home() {
                           style={{
                             display: "block",
                             width: "100%",
-                            height: "2px",
+                            height: "4px",
                             backgroundColor: "var(--colour-border)",
                             margin: "var(--space-2) 0",
                           }}
@@ -327,7 +364,7 @@ export default function Home() {
                             style={{
                               display: "block",
                               width: `${throttlePercent}%`,
-                              height: "2px",
+                              height: "4px",
                               backgroundColor: "limegreen",
                             }}
                           />
@@ -336,7 +373,7 @@ export default function Home() {
                           style={{
                             display: "block",
                             width: "100%",
-                            height: "2px",
+                            height: "4px",
                             backgroundColor: brakeApplied
                               ? "red"
                               : "var(--colour-border)",
@@ -392,76 +429,122 @@ export default function Home() {
                         <br />
                         Ldr {line.GapToLeader || "—"}
                       </span>
-                      {SessionInfo.Name === "Qualifying" && (
-                        <>
-                          <span>
-                            {line.BestLapTime.Value}
-                            {pos > 0 ? (
-                              <>
-                                {!!line.Stats[line.Stats.length - 1]
-                                  .TimeDiffToFastest && (
-                                  <>
-                                    <br />
-                                    <span style={{ color: "grey" }}>
-                                      P1{" "}
-                                      {
-                                        line.Stats[line.Stats.length - 1]
-                                          .TimeDiffToFastest
-                                      }
-                                    </span>
-                                  </>
-                                )}
-                                {!!line.Stats[line.Stats.length - 1]
-                                  .TimeDifftoPositionAhead && (
-                                  <>
-                                    <br />
-                                    <span style={{ color: "grey" }}>
-                                      P{pos}{" "}
-                                      {
-                                        line.Stats[line.Stats.length - 1]
-                                          .TimeDifftoPositionAhead
-                                      }
-                                    </span>
-                                  </>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <br />
-                                <span style={{ color: "grey" }}>—</span>
-                                <br />
-                                <span style={{ color: "grey" }}>—</span>
-                              </>
-                            )}
-                          </span>
-                          {line.Sectors.map((sector, i) => (
-                            <span
-                              key={`timing-data-${line.RacingNumber}-sector-${i}`}
-                              style={{
-                                color: sector.OverallFastest
-                                  ? "magenta"
-                                  : sector.PersonalFastest
-                                  ? "limegreen"
-                                  : "var(--colour-fg)",
-                              }}
-                            >
-                              S{i + 1} {sector.Value || sector.PreviousValue}
-                            </span>
-                          ))}
-                          <span>
-                            {line.PitOut
-                              ? "OUT LAP"
-                              : line.InPit
-                              ? "IN PIT"
-                              : "—"}
-                          </span>
-                          <span>{line.KnockedOut ? "OUT" : "—"}</span>
-                        </>
-                      )}
+                      <span>{currentStint.Compound[0]}</span>
+                      {/*{SessionInfo.Name === "Qualifying" && (*/}
+                      {/*  <>*/}
+                      {/*    <span>*/}
+                      {/*      {line.BestLapTime.Value}*/}
+                      {/*      {pos > 0 ? (*/}
+                      {/*        <>*/}
+                      {/*          {!!line.Stats[line.Stats.length - 1]*/}
+                      {/*            .TimeDiffToFastest && (*/}
+                      {/*            <>*/}
+                      {/*              <br />*/}
+                      {/*              <span style={{ color: "grey" }}>*/}
+                      {/*                P1{" "}*/}
+                      {/*                {*/}
+                      {/*                  line.Stats[line.Stats.length - 1]*/}
+                      {/*                    .TimeDiffToFastest*/}
+                      {/*                }*/}
+                      {/*              </span>*/}
+                      {/*            </>*/}
+                      {/*          )}*/}
+                      {/*          {!!line.Stats[line.Stats.length - 1]*/}
+                      {/*            .TimeDifftoPositionAhead && (*/}
+                      {/*            <>*/}
+                      {/*              <br />*/}
+                      {/*              <span style={{ color: "grey" }}>*/}
+                      {/*                P{pos}{" "}*/}
+                      {/*                {*/}
+                      {/*                  line.Stats[line.Stats.length - 1]*/}
+                      {/*                    .TimeDifftoPositionAhead*/}
+                      {/*                }*/}
+                      {/*              </span>*/}
+                      {/*            </>*/}
+                      {/*          )}*/}
+                      {/*        </>*/}
+                      {/*      ) : (*/}
+                      {/*        <>*/}
+                      {/*          <br />*/}
+                      {/*          <span style={{ color: "grey" }}>—</span>*/}
+                      {/*          <br />*/}
+                      {/*          <span style={{ color: "grey" }}>—</span>*/}
+                      {/*        </>*/}
+                      {/*      )}*/}
+                      {/*    </span>*/}
+                      {/*    {line.Sectors.map((sector, i) => (*/}
+                      {/*      <span*/}
+                      {/*        key={`timing-data-${line.RacingNumber}-sector-${i}`}*/}
+                      {/*        style={{*/}
+                      {/*          color: sector.OverallFastest*/}
+                      {/*            ? "magenta"*/}
+                      {/*            : sector.PersonalFastest*/}
+                      {/*            ? "limegreen"*/}
+                      {/*            : "var(--colour-fg)",*/}
+                      {/*        }}*/}
+                      {/*      >*/}
+                      {/*        S{i + 1} {sector.Value || sector.PreviousValue}*/}
+                      {/*      </span>*/}
+                      {/*    ))}*/}
+                      {/*    <span>*/}
+                      {/*      {line.PitOut*/}
+                      {/*        ? "OUT LAP"*/}
+                      {/*        : line.InPit*/}
+                      {/*        ? "IN PIT"*/}
+                      {/*        : "—"}*/}
+                      {/*    </span>*/}
+                      {/*    <span>{line.KnockedOut ? "OUT" : "—"}</span>*/}
+                      {/*  </>*/}
+                      {/*)}*/}
                       <span>
                         Lap {line.NumberOfLaps}
                         <br />
                         Stp {line.NumberOfPitStops}
+                      </span>
+                      <span style={{ display: "flex" }}>
+                        {line.Sectors.map((sector, i) => {
+                          return (
+                            <span
+                              key={`timing-data-${line.RacingNumber}-sector-${i}`}
+                              style={{
+                                marginRight: "var(--space-4)",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  display: "flex",
+                                  marginBottom: "var(--space-2)",
+                                }}
+                              >
+                                {sector.Segments.map((segment, j) => (
+                                  <span
+                                    key={`timing-data-${line.RacingNumber}-sector-${i}-segment-${j}`}
+                                    style={{
+                                      width: "4px",
+                                      height: "15px",
+                                      display: "block",
+                                      marginRight: "var(--space-2)",
+                                      backgroundColor: getSegmentColour(
+                                        segment.Status
+                                      ),
+                                    }}
+                                  />
+                                ))}
+                              </span>
+                              <span
+                                style={{
+                                  color: sector.OverallFastest
+                                    ? "magenta"
+                                    : sector.PersonalFastest
+                                    ? "limegreen"
+                                    : "var(--colour-fg)",
+                                }}
+                              >
+                                {sector.Value}
+                              </span>
+                            </span>
+                          );
+                        })}
                       </span>
                     </li>
                   );
