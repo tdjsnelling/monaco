@@ -9,9 +9,11 @@ const sortPosition = (a, b) => {
   return aPos - bPos;
 };
 
+const drsEnabledValues = [8, 10, 12, 14];
+
 export default function Home() {
   const [connected, setConnected] = useState(false);
-  const [liveState, setLiveState] = useState(mock.R);
+  const [liveState, setLiveState] = useState({});
 
   const socket = useRef();
   const retry = useRef();
@@ -50,11 +52,10 @@ export default function Home() {
   useEffect(() => {
     if (!connected) {
       initWebsocket((ws, data) => {
-        const { I, R } = JSON.parse(data);
-        if (I === "1") {
-          //setLiveState(R);
-          console.log(R);
-        }
+        try {
+          const d = JSON.parse(data);
+          setLiveState(d);
+        } catch (e) {}
       });
     }
   });
@@ -89,6 +90,7 @@ export default function Home() {
     Heartbeat,
     SessionInfo,
     TrackStatus,
+    LapCount,
     ExtrapolatedClock,
     WeatherData,
     DriverList,
@@ -136,7 +138,9 @@ export default function Home() {
         </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <main>
+      <main
+        style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      >
         <>
           <div
             style={{
@@ -154,23 +158,28 @@ export default function Home() {
               {!!SessionInfo && (
                 <>
                   <p style={{ marginRight: "var(--space-4)" }}>
-                    {SessionInfo.Meeting.OfficialName},{" "}
+                    <strong>{SessionInfo.Meeting.OfficialName}</strong>,{" "}
                     {SessionInfo.Meeting.Circuit.ShortName},{" "}
                     {SessionInfo.Meeting.Country.Name}
                   </p>
                   <p style={{ marginRight: "var(--space-4)" }}>
-                    Session {SessionInfo.Name}
+                    Session: {SessionInfo.Name}
                   </p>
                 </>
               )}
               {!!TrackStatus && (
                 <p style={{ marginRight: "var(--space-4)" }}>
-                  Status {TrackStatus.Message}
+                  Status: {TrackStatus.Message}
+                </p>
+              )}
+              {!!LapCount && (
+                <p style={{ marginRight: "var(--space-4)" }}>
+                  Lap: {LapCount.CurrentLap}/{LapCount.TotalLaps}
                 </p>
               )}
               {!!ExtrapolatedClock && (
                 <p style={{ marginRight: "var(--space-4)" }}>
-                  Remaining {ExtrapolatedClock.Remaining}
+                  Remaining: {ExtrapolatedClock.Remaining}
                 </p>
               )}
             </div>
@@ -180,9 +189,9 @@ export default function Home() {
               }}
             >
               <p style={{ marginRight: "var(--space-4)" }}>
-                Data updated {moment(Heartbeat.Utc).format("HH:mm:ss")}
+                Data updated: {moment(Heartbeat.Utc).format("HH:mm:ss")}
               </p>
-              <p style={{ color: "green", marginRight: "var(--space-4)" }}>
+              <p style={{ color: "limegreen", marginRight: "var(--space-4)" }}>
                 CONNECTED
               </p>
               <a
@@ -203,13 +212,16 @@ export default function Home() {
                 borderBottom: "1px solid var(--colour-border)",
               }}
             >
+              <p style={{ marginRight: "var(--space-4)" }}>
+                <strong>WEATHER</strong>
+              </p>
               {Object.entries(WeatherData).map(([k, v]) =>
                 k !== "_kf" ? (
                   <p
                     key={`weather-${k}`}
                     style={{ marginRight: "var(--space-4)" }}
                   >
-                    {k} {v}
+                    {k}: {v}
                   </p>
                 ) : null
               )}
@@ -217,168 +229,168 @@ export default function Home() {
           )}
         </>
 
-        <div
-          style={{
-            display: "flex",
-            borderBottom: "1px solid var(--colour-border)",
-          }}
-        >
-          {!!DriverList && (
-            <div
-              style={{
-                width: "100%",
-                borderRight: "1px solid var(--colour-border)",
-              }}
-            >
-              <div
-                style={{
-                  padding: "var(--space-3)",
-                  backgroundColor: "var(--colour-offset)",
-                }}
-              >
-                <p>Entries</p>
-              </div>
-              <ul
-                style={{ listStyle: "none", height: "200px", overflow: "auto" }}
-              >
-                {Object.values(DriverList).map((driver) =>
-                  driver.RacingNumber ? (
-                    <li
-                      key={`driver-${driver.RacingNumber}`}
-                      style={{ padding: "var(--space-3)" }}
-                    >
-                      {driver.RacingNumber} {driver.FullName} ({driver.Tla}){" "}
-                      <span style={{ color: `#${driver.TeamColour}` }}>
-                        {driver.TeamName}
-                      </span>
-                    </li>
-                  ) : null
-                )}
-              </ul>
-            </div>
-          )}
-
-          {!!SessionData && (
-            <div
-              style={{
-                width: "100%",
-                borderRight: "1px solid var(--colour-border)",
-              }}
-            >
-              <div
-                style={{
-                  padding: "var(--space-3)",
-                  backgroundColor: "var(--colour-offset)",
-                }}
-              >
-                <p>Session status messages</p>
-              </div>
-              <ul
-                style={{ listStyle: "none", height: "200px", overflow: "auto" }}
-              >
-                {[...SessionData.StatusSeries].reverse().map((event) => (
-                  <li
-                    key={`status-series-${event.Utc}`}
-                    style={{ padding: "var(--space-3)" }}
-                  >
-                    <span
-                      style={{ color: "grey", marginRight: "var(--space-4)" }}
-                    >
-                      {moment(event.Utc).format("HH:mm:ss")}
-                    </span>
-                    {Object.entries(event).map(([k, v]) =>
-                      k !== "Utc" ? (
-                        <span
-                          key={`status-series-${event.Utc}-${k}`}
-                          style={{ marginRight: "var(--space-4)" }}
-                        >
-                          {k} {v}
-                        </span>
-                      ) : null
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {!!RaceControlMessages && (
-            <div
-              style={{
-                width: "100%",
-                borderRight: "1px solid var(--colour-border)",
-              }}
-            >
-              <div
-                style={{
-                  padding: "var(--space-3)",
-                  backgroundColor: "var(--colour-offset)",
-                }}
-              >
-                <p>Race control messages</p>
-              </div>
-              <ul
-                style={{ listStyle: "none", height: "200px", overflow: "auto" }}
-              >
-                {[...RaceControlMessages.Messages].reverse().map((event) => (
-                  <li
-                    key={`race-control-${event.Utc}`}
-                    style={{ padding: "var(--space-3)" }}
-                  >
-                    <span
-                      style={{ color: "grey", marginRight: "var(--space-4)" }}
-                    >
-                      {moment(event.Utc).format("HH:mm:ss")}
-                    </span>
-                    <span>{event.Message}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-        <div
-          style={{
-            borderBottom: "1px solid var(--colour-border)",
-          }}
-        >
+        <div>
           <div
             style={{
               padding: "var(--space-3)",
               backgroundColor: "var(--colour-offset)",
             }}
           >
-            <p>Timing data</p>
+            <p>
+              <strong>LIVE TIMING DATA</strong>
+            </p>
           </div>
-          <ul style={{ listStyle: "none", height: "300px", overflow: "auto" }}>
+          <ul
+            style={{
+              listStyle: "none",
+              columns: 2,
+              columnGap: "0px",
+              overflow: "auto",
+            }}
+          >
             {!!TimingData &&
               Object.values(TimingData.Lines)
                 .sort(sortPosition)
                 .map((line, pos) => {
                   const driver = DriverList[line.RacingNumber];
-
-                  let bestLapTire;
-                  if (SessionInfo.Name === "Qualifying") {
-                    const bestLapNumber = line.BestLapTime.Lap;
-                    const validStints = TimingAppData.Lines[
+                  const carData =
+                    CarData.Entries[CarData.Entries.length - 1].Cars[
                       line.RacingNumber
-                    ].Stints.filter((s) => s.LapNumber < bestLapNumber);
-                    bestLapTire = validStints[validStints.length - 1]?.Compound;
-                  }
+                    ].Channels;
+
+                  const rpmPercent = (carData["0"] / 15000) * 100;
+                  const throttlePercent = Math.min(100, carData["4"]);
+                  const brakeApplied = carData["5"] > 0;
 
                   return (
                     <li
                       key={`timing-data-${line.RacingNumber}`}
                       style={{
                         padding: "var(--space-3)",
+                        borderBottom: "1px solid var(--colour-border)",
+                        borderLeft:
+                          pos > 9
+                            ? "1px solid var(--colour-border)"
+                            : undefined,
                         display: "grid",
-                        gridTemplateColumns: "repeat(15, 100px)",
+                        gridTemplateColumns:
+                          "25px 48px 75px 75px 25px 105px 90px repeat(10, 75px)",
                         gridGap: "var(--space-4)",
+                        alignItems: "center",
                       }}
                     >
-                      <span>{line.Position}</span>
-                      <span style={{ color: `#${driver.TeamColour}` }}>
+                      <span>P{line.Position}</span>
+                      <span
+                        style={{
+                          color: `#${driver.TeamColour}`,
+                          textAlign: "right",
+                        }}
+                      >
                         {line.RacingNumber} {driver.Tla}
+                      </span>
+                      <span>
+                        {carData["0"].toString()}
+                        <br />
+                        <span
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            height: "2px",
+                            backgroundColor: "var(--colour-border)",
+                            margin: "var(--space-2) 0",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "block",
+                              width: `${rpmPercent}%`,
+                              height: "2px",
+                              backgroundColor: "cyan",
+                            }}
+                          />
+                        </span>
+                        Gear {carData["3"].toString()}
+                      </span>
+                      <span>
+                        {carData["2"].toString()} km/h
+                        <br />
+                        <span
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            height: "2px",
+                            backgroundColor: "var(--colour-border)",
+                            margin: "var(--space-2) 0",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "block",
+                              width: `${throttlePercent}%`,
+                              height: "2px",
+                              backgroundColor: "limegreen",
+                            }}
+                          />
+                        </span>
+                        <span
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            height: "2px",
+                            backgroundColor: brakeApplied
+                              ? "red"
+                              : "var(--colour-border)",
+                            margin: "var(--space-2) 0",
+                          }}
+                        />
+                      </span>
+                      <span
+                        style={{
+                          color: drsEnabledValues.includes(carData["45"])
+                            ? "limegreen"
+                            : "grey",
+                        }}
+                      >
+                        DRS
+                      </span>
+                      <span>
+                        Lst{" "}
+                        <span
+                          style={{
+                            color: line.LastLapTime.OverallFastest
+                              ? "magenta"
+                              : line.LastLapTime.PersonalFastest
+                              ? "limegreen"
+                              : "var(--colour-fg)",
+                          }}
+                        >
+                          {line.LastLapTime.Value}
+                        </span>
+                        <br />
+                        Bst{" "}
+                        <span
+                          style={{
+                            color: line.LastLapTime.OverallFastest
+                              ? "magenta"
+                              : "var(--colour-fg)",
+                          }}
+                        >
+                          {line.BestLapTime.Value}
+                        </span>
+                      </span>
+                      <span>
+                        Gap{" "}
+                        <span
+                          style={{
+                            color: line.IntervalToPositionAhead.Catching
+                              ? "limegreen"
+                              : "var(--colour-fg)",
+                          }}
+                        >
+                          {line.IntervalToPositionAhead.Value || "—"}
+                        </span>
+                        <br />
+                        Ldr {line.GapToLeader || "—"}
                       </span>
                       {SessionInfo.Name === "Qualifying" && (
                         <>
@@ -436,7 +448,6 @@ export default function Home() {
                               S{i + 1} {sector.Value || sector.PreviousValue}
                             </span>
                           ))}
-                          <span>{bestLapTire}</span>
                           <span>
                             {line.PitOut
                               ? "OUT LAP"
@@ -447,12 +458,118 @@ export default function Home() {
                           <span>{line.KnockedOut ? "OUT" : "—"}</span>
                         </>
                       )}
-                      <span>Laps {line.NumberOfLaps}</span>
-                      <span>Stops {line.NumberOfPitStops}</span>
+                      <span>
+                        Lap {line.NumberOfLaps}
+                        <br />
+                        Stp {line.NumberOfPitStops}
+                      </span>
                     </li>
                   );
                 })}
           </ul>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexGrow: 1,
+          }}
+        >
+          {!!SessionData && (
+            <div
+              style={{
+                width: "100%",
+                borderRight: "1px solid var(--colour-border)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div
+                style={{
+                  padding: "var(--space-3)",
+                  backgroundColor: "var(--colour-offset)",
+                }}
+              >
+                <p>
+                  <strong>SESSION STATUS MESSAGES</strong>
+                </p>
+              </div>
+              <ul
+                style={{
+                  listStyle: "none",
+                  height: "100px",
+                  overflow: "auto",
+                  flexGrow: 1,
+                }}
+              >
+                {[...SessionData.StatusSeries].reverse().map((event, i) => (
+                  <li
+                    key={`status-series-${event.Utc}-${i}`}
+                    style={{ padding: "var(--space-3)" }}
+                  >
+                    <span
+                      style={{ color: "grey", marginRight: "var(--space-4)" }}
+                    >
+                      {moment(event.Utc).format("HH:mm:ss")}
+                    </span>
+                    {Object.entries(event).map(([k, v]) =>
+                      k !== "Utc" ? (
+                        <span
+                          key={`status-series-${event.Utc}-${k}`}
+                          style={{ marginRight: "var(--space-4)" }}
+                        >
+                          {k} {v}
+                        </span>
+                      ) : null
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {!!RaceControlMessages && (
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div
+                style={{
+                  padding: "var(--space-3)",
+                  backgroundColor: "var(--colour-offset)",
+                }}
+              >
+                <p>
+                  <strong>RACE CONTROL MESSAGES</strong>
+                </p>
+              </div>
+              <ul
+                style={{
+                  listStyle: "none",
+                  height: "100px",
+                  overflow: "auto",
+                  flexGrow: 1,
+                }}
+              >
+                {[...RaceControlMessages.Messages].reverse().map((event, i) => (
+                  <li
+                    key={`race-control-${event.Utc}-${i}`}
+                    style={{ padding: "var(--space-3)" }}
+                  >
+                    <span
+                      style={{ color: "grey", marginRight: "var(--space-4)" }}
+                    >
+                      {moment(event.Utc).format("HH:mm:ss")}
+                    </span>
+                    <span>{event.Message}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </main>
     </>

@@ -10,22 +10,65 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-const URL = "livetiming.formula1.com/signalr";
-const HUB = "Streaming";
+const signalrUrl = "livetiming.formula1.com/signalr";
+const signalrHub = "Streaming";
+
+const socketFreq = 500;
+
+let state = {};
+let messageCount = 0;
+
+const deepObjectMerge = (original = {}, modifier) => {
+  if (!modifier) return original;
+  const copy = { ...original };
+  for (const [key, value] of Object.entries(modifier)) {
+    const valueIsObject =
+      typeof value === "object" && !Array.isArray(value) && value !== null;
+    if (valueIsObject && !!Object.keys(value).length) {
+      copy[key] = deepObjectMerge(copy[key], value);
+    } else {
+      copy[key] = value;
+    }
+  }
+  return copy;
+};
+
+const parseCompressed = (data) =>
+  JSON.parse(zlib.inflateRawSync(Buffer.from(data, "base64")).toString());
 
 const setupStream = async () => {
+  console.log("connecting to live timing stream...");
+
   const wss = new ws.WebSocketServer({ port: port + 1 });
 
-  const hub = encodeURIComponent(JSON.stringify([{ name: HUB }]));
+  // Assume we have an active session after 5 messages
+  setInterval(() => {
+    wss.clients.forEach((s) => {
+      if (s.readyState === ws.OPEN) {
+        s.send(
+          messageCount > 5 || process.env.NODE_ENV !== "production"
+            ? JSON.stringify(state)
+            : "{}",
+          {
+            binary: false,
+          }
+        );
+      }
+    });
+  }, socketFreq);
+
+  const hub = encodeURIComponent(JSON.stringify([{ name: signalrHub }]));
   const negotiation = await fetch(
-    `https://${URL}/negotiate?connectionData=${hub}&clientProtocol=1.5`
+    `https://${signalrUrl}/negotiate?connectionData=${hub}&clientProtocol=1.5`
   );
   const cookie = negotiation.headers.get("set-cookie");
   const { ConnectionToken } = await negotiation.json();
 
   if (cookie && ConnectionToken) {
+    console.log("negotiation complete");
+
     const socket = new ws(
-      `wss://${URL}/signalr/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodeURIComponent(
+      `wss://${signalrUrl}/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodeURIComponent(
         ConnectionToken
       )}&connectionData=${hub}`,
       [],
@@ -39,9 +82,13 @@ const setupStream = async () => {
     );
 
     socket.on("open", () => {
+      console.log("websocket open");
+
+      state = {};
+
       socket.send(
         JSON.stringify({
-          H: HUB,
+          H: signalrHub,
           M: "Subscribe",
           A: [
             [
@@ -72,31 +119,39 @@ const setupStream = async () => {
       try {
         const parsed = JSON.parse(data.toString());
 
-        if (parsed.R["CarData.z"]) {
-          parsed.R.CarData = JSON.parse(
-            zlib
-              .inflateRawSync(Buffer.from(parsed.R["CarData.z"], "base64"))
-              .toString()
-          );
-        }
+        if (Array.isArray(parsed.M)) {
+          for (const message of parsed.M) {
+            if (message.M === "feed") {
+              messageCount++;
 
-        if (parsed.R["Position.z"]) {
-          parsed.R.Position = JSON.parse(
-            zlib
-              .inflateRawSync(Buffer.from(parsed.R["Position.z"], "base64"))
-              .toString()
-          );
-        }
+              let { field, value } = message.A;
 
-        wss.clients.forEach((s) => {
-          if (s.readyState === ws.OPEN) {
-            s.send(data);
+              if (field === "CarData.z" || field === "Position.z") {
+                const [parsedField] = field.split(".");
+                field = parsedField;
+                value = parseCompressed(value);
+              }
+
+              state = deepObjectMerge(state, { [field]: value });
+            }
           }
-        });
+        } else if (Object.keys(parsed.R ?? {}).length && parsed.I === "1") {
+          messageCount++;
+
+          if (parsed.R["CarData.z"])
+            parsed.R["CarData"] = parseCompressed(parsed.R["CarData.z"]);
+
+          if (parsed.R["Position.z"])
+            parsed.R["Position"] = parseCompressed(parsed.R["Position.z"]);
+
+          state = deepObjectMerge(state, parsed.R);
+        }
       } catch (e) {
-        console.error(`could not send message: ${e}`);
+        console.error(`could not update data: ${e}`);
       }
     });
+  } else {
+    console.log("negotiation failed. is there a live session?");
   }
 };
 
