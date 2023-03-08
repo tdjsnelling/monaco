@@ -3,6 +3,7 @@ const { parse } = require("url");
 const next = require("next");
 const ws = require("ws");
 const zlib = require("zlib");
+const fs = require("fs");
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -13,7 +14,7 @@ const handle = app.getRequestHandler();
 const signalrUrl = "livetiming.formula1.com/signalr";
 const signalrHub = "Streaming";
 
-const socketFreq = 500;
+const socketFreq = 250;
 
 let state = {};
 let messageCount = 0;
@@ -36,6 +37,50 @@ const deepObjectMerge = (original = {}, modifier) => {
 
 const parseCompressed = (data) =>
   JSON.parse(zlib.inflateRawSync(Buffer.from(data, "base64")).toString());
+
+const updateState = (data) => {
+  try {
+    const parsed = JSON.parse(data.toString());
+
+    if (!Object.keys(parsed).length) emptyMessageCount++;
+    else emptyMessageCount = 0;
+
+    if (emptyMessageCount > 5 && !dev) {
+      state = {};
+      messageCount = 0;
+    }
+
+    if (Array.isArray(parsed.M)) {
+      for (const message of parsed.M) {
+        if (message.M === "feed") {
+          messageCount++;
+
+          let [field, value] = message.A;
+
+          if (field === "CarData.z" || field === "Position.z") {
+            const [parsedField] = field.split(".");
+            field = parsedField;
+            value = parseCompressed(value);
+          }
+
+          state = deepObjectMerge(state, { [field]: value });
+        }
+      }
+    } else if (Object.keys(parsed.R ?? {}).length && parsed.I === "1") {
+      messageCount++;
+
+      if (parsed.R["CarData.z"])
+        parsed.R["CarData"] = parseCompressed(parsed.R["CarData.z"]);
+
+      if (parsed.R["Position.z"])
+        parsed.R["Position"] = parseCompressed(parsed.R["Position.z"]);
+
+      state = deepObjectMerge(state, parsed.R);
+    }
+  } catch (e) {
+    console.error(`could not update data: ${e}`);
+  }
+};
 
 const setupStream = async (wss) => {
   console.log("connecting to live timing stream...");
@@ -101,47 +146,7 @@ const setupStream = async (wss) => {
     });
 
     socket.on("message", (data) => {
-      try {
-        const parsed = JSON.parse(data.toString());
-
-        if (!Object.keys(parsed).length) emptyMessageCount++;
-        else emptyMessageCount = 0;
-
-        if (emptyMessageCount > 5 && !dev) {
-          state = {};
-          messageCount = 0;
-        }
-
-        if (Array.isArray(parsed.M)) {
-          for (const message of parsed.M) {
-            if (message.M === "feed") {
-              messageCount++;
-
-              let { field, value } = message.A;
-
-              if (field === "CarData.z" || field === "Position.z") {
-                const [parsedField] = field.split(".");
-                field = parsedField;
-                value = parseCompressed(value);
-              }
-
-              state = deepObjectMerge(state, { [field]: value });
-            }
-          }
-        } else if (Object.keys(parsed.R ?? {}).length && parsed.I === "1") {
-          messageCount++;
-
-          if (parsed.R["CarData.z"])
-            parsed.R["CarData"] = parseCompressed(parsed.R["CarData.z"]);
-
-          if (parsed.R["Position.z"])
-            parsed.R["Position"] = parseCompressed(parsed.R["Position.z"]);
-
-          state = deepObjectMerge(state, parsed.R);
-        }
-      } catch (e) {
-        console.error(`could not update data: ${e}`);
-      }
+      updateState(data);
     });
 
     socket.on("error", () => {
@@ -184,6 +189,32 @@ app.prepare().then(async () => {
   }, socketFreq);
 
   await setupStream(wss);
+
+  // const testSend = (m, i) => {
+  //   setTimeout(() => {
+  //     console.log(i);
+  //     updateState(
+  //       JSON.stringify({
+  //         M: [
+  //           {
+  //             M: "feed",
+  //             A: JSON.parse(
+  //               m[i]
+  //                 .replaceAll("'", '"')
+  //                 .replaceAll("True", "true")
+  //                 .replaceAll("False", "false")
+  //             ),
+  //           },
+  //         ],
+  //       })
+  //     );
+  //     testSend(m, i + 1);
+  //   }, 50);
+  // };
+  //
+  // const testFile = fs.readFileSync("./2021_1_FP3.txt", "utf-8");
+  // const testMessages = testFile.split("\n");
+  // testSend(testMessages, 0);
 
   createServer(async (req, res) => {
     try {
