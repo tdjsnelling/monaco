@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import moment from "moment";
-import Driver from "@monaco/components/driver";
+import ResponsiveTable from "@monaco/components/ResponsiveTable";
+import Driver from "@monaco/components/Driver";
 
 const sortPosition = (a, b) => {
   const [, aLine] = a;
@@ -138,9 +139,7 @@ export default function Home() {
         </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <main
-        style={{ height: "100vh", display: "flex", flexDirection: "column" }}
-      >
+      <main>
         <>
           <div
             style={{
@@ -240,13 +239,7 @@ export default function Home() {
               <strong>LIVE TIMING DATA</strong>
             </p>
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "50% 50%",
-              minHeight: "100px",
-            }}
-          >
+          <ResponsiveTable>
             {!!TimingData && (
               <>
                 {(() => {
@@ -265,7 +258,6 @@ export default function Home() {
                             key={`timing-data-${racingNumber}`}
                             racingNumber={racingNumber}
                             line={line}
-                            pos={pos}
                             DriverList={DriverList}
                             CarData={CarData}
                             TimingAppData={TimingAppData}
@@ -280,7 +272,6 @@ export default function Home() {
                               key={`timing-data-${racingNumber}`}
                               racingNumber={racingNumber}
                               line={line}
-                              pos={pos}
                               DriverList={DriverList}
                               CarData={CarData}
                               TimingAppData={TimingAppData}
@@ -292,13 +283,12 @@ export default function Home() {
                 })()}
               </>
             )}
-          </div>
+          </ResponsiveTable>
         </div>
 
-        <div
+        <ResponsiveTable
           style={{
-            display: "flex",
-            flexGrow: 1,
+            borderBottom: "1px solid var(--colour-border)",
           }}
         >
           <div
@@ -408,7 +398,7 @@ export default function Home() {
               </ul>
             )}
           </div>
-        </div>
+        </ResponsiveTable>
       </main>
     </>
   );
