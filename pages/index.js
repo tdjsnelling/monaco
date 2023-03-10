@@ -56,10 +56,19 @@ export default function Home() {
         try {
           const d = JSON.parse(data);
           setLiveState(d);
-        } catch (e) {}
+        } catch (e) {
+          console.error(`could not process message: ${e}`);
+        }
       });
     }
-  });
+  }, []);
+
+  const messageCount =
+    Object.values(liveState?.RaceControlMessages?.Messages ?? []).length +
+    Object.values(liveState?.SessionData?.StatusSeries ?? []).length;
+  useEffect(() => {
+    new Audio("/notif.mp3").play();
+  }, [messageCount]);
 
   if (!connected)
     return (

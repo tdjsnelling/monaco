@@ -72,7 +72,7 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
         <span>
           P{line.Position}
           <br />
-          {!Number.isNaN(Number(appData.GridPos)) && (
+          {!Number.isNaN(Number(appData?.GridPos)) && (
             <span style={{ color: "grey" }}>
               {Number(appData.GridPos) >= Number(line.Position) && "+"}
               {Number(appData.GridPos) - Number(line.Position)}
