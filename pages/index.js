@@ -240,7 +240,7 @@ export default function Home() {
         <div>
           <div
             style={{
-              padding: "var(--space-3)",
+              padding: "var(--space-2) var(--space-3)",
               backgroundColor: "var(--colour-offset)",
             }}
           >
@@ -248,8 +248,13 @@ export default function Home() {
               <strong>LIVE TIMING DATA</strong>
             </p>
           </div>
-          <ResponsiveTable>
-            {!!TimingData && (
+          <ResponsiveTable
+            style={{
+              borderBottom: "1px solid var(--colour-border)",
+              gridTemplateColumns: !TimingData ? "1fr" : undefined,
+            }}
+          >
+            {!!TimingData ? (
               <>
                 {(() => {
                   const lines = Object.entries(TimingData.Lines).sort(
@@ -291,6 +296,16 @@ export default function Home() {
                   );
                 })()}
               </>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <p>NO DATA YET</p>
+              </div>
             )}
           </ResponsiveTable>
         </div>
@@ -310,7 +325,7 @@ export default function Home() {
           >
             <div
               style={{
-                padding: "var(--space-3)",
+                padding: "var(--space-2) var(--space-3)",
                 backgroundColor: "var(--colour-offset)",
               }}
             >
@@ -318,7 +333,7 @@ export default function Home() {
                 <strong>SESSION STATUS MESSAGES</strong>
               </p>
             </div>
-            {!!SessionData && (
+            {!!SessionData ? (
               <ul
                 style={{
                   listStyle: "none",
@@ -356,6 +371,17 @@ export default function Home() {
                     </li>
                   ))}
               </ul>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                }}
+              >
+                <p>NO DATA YET</p>
+              </div>
             )}
           </div>
 
@@ -368,7 +394,7 @@ export default function Home() {
           >
             <div
               style={{
-                padding: "var(--space-3)",
+                padding: "var(--space-2) var(--space-3)",
                 backgroundColor: "var(--colour-offset)",
               }}
             >
@@ -376,7 +402,7 @@ export default function Home() {
                 <strong>RACE CONTROL MESSAGES</strong>
               </p>
             </div>
-            {!!RaceControlMessages && (
+            {!!RaceControlMessages ? (
               <ul
                 style={{
                   listStyle: "none",
@@ -405,6 +431,17 @@ export default function Home() {
                     </li>
                   ))}
               </ul>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                }}
+              >
+                <p>NO DATA YET</p>
+              </div>
             )}
           </div>
         </ResponsiveTable>

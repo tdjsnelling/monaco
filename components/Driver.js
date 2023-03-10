@@ -22,7 +22,7 @@ const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
   > div {
     padding: 0 var(--space-3);
-    height: 60px;
+    height: 50px;
     display: grid;
     grid-template-columns: 25px 64px 64px 64px 25px 105px 90px 10px 55px auto;
     grid-gap: var(--space-4);
@@ -105,7 +105,7 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
             : null}
         </span>
         <span>
-          {carData["0"].toString()}
+          {carData["3"].toString()} {carData["0"].toString()}
           <br />
           <ProgressBar>
             <span
@@ -115,7 +115,6 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
               }}
             />
           </ProgressBar>
-          Gear {carData["3"].toString()}
         </span>
         <span>
           {carData["2"].toString()} km/h
@@ -219,7 +218,7 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
                       key={`timing-data-${racingNumber}-sector-${i}-segment-${j}`}
                       style={{
                         width: "2px",
-                        height: "15px",
+                        height: "12px",
                         display: "block",
                         marginRight: "var(--space-2)",
                         backgroundColor: getSegmentColour(segment.Status),

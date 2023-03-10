@@ -13,13 +13,14 @@ const GlobalStyle = createGlobalStyle`
     --colour-border: #555;
     --colour-offset: #222;
     
-    --fontSize-body: 13px;
-    --fontFamily-body: monospace;
+    --fontSize-body: 12px;
+    --fontFamily-body: 'JetBrains Mono', monospace;
   }
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
   }
   body {
     background-color: var(--colour-bg);
