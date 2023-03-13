@@ -156,6 +156,7 @@ export default function Home() {
               justifyContent: "space-between",
               padding: "var(--space-3)",
               borderBottom: "1px solid var(--colour-border)",
+              overflowX: "auto",
             }}
           >
             <div
@@ -218,6 +219,7 @@ export default function Home() {
                 display: "flex",
                 padding: "var(--space-3)",
                 borderBottom: "1px solid var(--colour-border)",
+                overflowX: "auto",
               }}
             >
               <p style={{ marginRight: "var(--space-4)" }}>
@@ -311,6 +313,7 @@ export default function Home() {
         </div>
 
         <ResponsiveTable
+          cols="2fr 1fr"
           style={{
             borderBottom: "1px solid var(--colour-border)",
           }}
@@ -318,7 +321,81 @@ export default function Home() {
           <div
             style={{
               width: "100%",
+              display: "flex",
+              flexDirection: "column",
               borderRight: "1px solid var(--colour-border)",
+            }}
+          >
+            <div
+              style={{
+                padding: "var(--space-2) var(--space-3)",
+                backgroundColor: "var(--colour-offset)",
+              }}
+            >
+              <p>
+                <strong>RACE CONTROL MESSAGES</strong>
+              </p>
+            </div>
+            {!!RaceControlMessages ? (
+              <ul
+                style={{
+                  listStyle: "none",
+                  height: "100px",
+                  overflow: "auto",
+                  flexGrow: 1,
+                }}
+              >
+                {[
+                  ...(Array.isArray(RaceControlMessages.Messages)
+                    ? RaceControlMessages.Messages
+                    : Object.values(RaceControlMessages.Messages)),
+                ]
+                  .reverse()
+                  .map((event, i) => (
+                    <li
+                      key={`race-control-${event.Utc}-${i}`}
+                      style={{ padding: "var(--space-3)" }}
+                    >
+                      <span
+                        style={{ color: "grey", marginRight: "var(--space-4)" }}
+                      >
+                        {moment(event.Utc).format("HH:mm:ss")}
+                        {event.Lap && ` / Lap ${event.Lap}`}
+                      </span>
+                      {event.Category === "Flag" && (
+                        <span
+                          style={{
+                            backgroundColor: event.Flag?.toLowerCase(),
+                            border: "1px solid var(--colour-border)",
+                            borderRadius: "var(--space-1)",
+                            padding: "0 var(--space-2)",
+                            marginRight: "var(--space-3)",
+                          }}
+                        >
+                          FLAG
+                        </span>
+                      )}
+                      <span>{event.Message.trim()}</span>
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                }}
+              >
+                <p>NO DATA YET</p>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              width: "100%",
               display: "flex",
               flexDirection: "column",
             }}
@@ -364,70 +441,10 @@ export default function Home() {
                             key={`status-series-${event.Utc}-${k}`}
                             style={{ marginRight: "var(--space-4)" }}
                           >
-                            {k} {v}
+                            {k}: {v}
                           </span>
                         ) : null
                       )}
-                    </li>
-                  ))}
-              </ul>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                }}
-              >
-                <p>NO DATA YET</p>
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <div
-              style={{
-                padding: "var(--space-2) var(--space-3)",
-                backgroundColor: "var(--colour-offset)",
-              }}
-            >
-              <p>
-                <strong>RACE CONTROL MESSAGES</strong>
-              </p>
-            </div>
-            {!!RaceControlMessages ? (
-              <ul
-                style={{
-                  listStyle: "none",
-                  height: "100px",
-                  overflow: "auto",
-                  flexGrow: 1,
-                }}
-              >
-                {[
-                  ...(Array.isArray(RaceControlMessages.Messages)
-                    ? RaceControlMessages.Messages
-                    : Object.values(RaceControlMessages.Messages)),
-                ]
-                  .reverse()
-                  .map((event, i) => (
-                    <li
-                      key={`race-control-${event.Utc}-${i}`}
-                      style={{ padding: "var(--space-3)" }}
-                    >
-                      <span
-                        style={{ color: "grey", marginRight: "var(--space-4)" }}
-                      >
-                        {moment(event.Utc).format("HH:mm:ss")}
-                      </span>
-                      <span>{event.Message}</span>
                     </li>
                   ))}
               </ul>

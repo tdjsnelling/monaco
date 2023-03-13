@@ -146,7 +146,7 @@ const setupStream = async (wss) => {
     });
 
     socket.on("message", (data) => {
-      //updateState(data);
+      updateState(data);
     });
 
     socket.on("error", () => {
@@ -190,31 +190,31 @@ app.prepare().then(async () => {
 
   await setupStream(wss);
 
-  const testSend = (m, i) => {
-    setTimeout(() => {
-      console.log(i);
-      updateState(
-        JSON.stringify({
-          M: [
-            {
-              M: "feed",
-              A: JSON.parse(
-                m[i]
-                  .replaceAll("'", '"')
-                  .replaceAll("True", "true")
-                  .replaceAll("False", "false")
-              ),
-            },
-          ],
-        })
-      );
-      testSend(m, i + 1);
-    }, 50);
-  };
-
-  const testFile = fs.readFileSync("./2021_1_FP3.txt", "utf-8");
-  const testMessages = testFile.split("\n");
-  testSend(testMessages, 0);
+  // const testSend = (m, i) => {
+  //   setTimeout(() => {
+  //     console.log(i);
+  //     updateState(
+  //       JSON.stringify({
+  //         M: [
+  //           {
+  //             M: "feed",
+  //             A: JSON.parse(
+  //               m[i]
+  //                 .replaceAll("'", '"')
+  //                 .replaceAll("True", "true")
+  //                 .replaceAll("False", "false")
+  //             ),
+  //           },
+  //         ],
+  //       })
+  //     );
+  //     testSend(m, i + 1);
+  //   }, 50);
+  // };
+  //
+  // const testFile = fs.readFileSync("./2021_1_FP3.txt", "utf-8");
+  // const testMessages = testFile.split("\n");
+  // testSend(testMessages, 0);
 
   createServer(async (req, res) => {
     try {

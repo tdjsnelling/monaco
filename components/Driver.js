@@ -18,6 +18,23 @@ const getSegmentColour = (status) => {
   }
 };
 
+const getTyreColour = (compound) => {
+  switch (compound.toLowerCase()) {
+    case "soft":
+      return "red";
+    case "medium":
+      return "yellow";
+    case "hard":
+      return "var(--colour-fg)";
+    case "intermediate":
+      return "green";
+    case "wet":
+      return "blue";
+    default:
+      return "var(--colour-fg)";
+  }
+};
+
 const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
   > div {
@@ -186,7 +203,9 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
           <br />
           Ldr {line.GapToLeader || "—"}
         </span>
-        <span>{currentStint?.Compound[0]}</span>
+        <span style={{ color: getTyreColour(currentStint?.Compound) }}>
+          {currentStint?.Compound[0]}
+        </span>
         <span>
           Lap {line.NumberOfLaps}
           <br />
