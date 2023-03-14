@@ -108,6 +108,7 @@ export default function Home() {
     RaceControlMessages,
     TimingData,
     TimingAppData,
+    TimingStats,
     CarData,
     Position,
   } = liveState;
@@ -137,8 +138,6 @@ export default function Home() {
         </main>
       </>
     );
-
-  console.log(liveState);
 
   return (
     <>
@@ -280,6 +279,7 @@ export default function Home() {
                             DriverList={DriverList}
                             CarData={CarData}
                             TimingAppData={TimingAppData}
+                            TimingStats={TimingStats}
                             Position={Position}
                           />
                         ))}
@@ -297,6 +297,7 @@ export default function Home() {
                               DriverList={DriverList}
                               CarData={CarData}
                               TimingAppData={TimingAppData}
+                              TimingStats={TimingStats}
                               Position={Position}
                             />
                           ))}

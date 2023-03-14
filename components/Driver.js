@@ -68,6 +68,7 @@ const Driver = ({
   DriverList,
   CarData,
   TimingAppData,
+  TimingStats,
   Position,
 }) => {
   const driver = DriverList[racingNumber];
@@ -119,7 +120,17 @@ const Driver = ({
         }}
       >
         <span>
-          P{line.Position}
+          <span
+            style={{
+              color:
+                TimingStats.Lines[racingNumber]?.PersonalBestLapTime
+                  ?.Position === 1
+                  ? "magenta"
+                  : "var(--colour-fg)",
+            }}
+          >
+            P{line.Position}
+          </span>
           <br />
           {!Number.isNaN(Number(appData?.GridPos)) && (
             <span style={{ color: "grey" }}>
