@@ -19,7 +19,7 @@ const getSegmentColour = (status) => {
 };
 
 const getTyreColour = (compound) => {
-  switch (compound.toLowerCase()) {
+  switch (compound?.toLowerCase()) {
     case "soft":
       return "red";
     case "medium":
@@ -41,7 +41,7 @@ const DriverItem = styled.div`
     padding: 0 var(--space-3);
     height: 50px;
     display: grid;
-    grid-template-columns: 25px 64px 64px 64px 25px 105px 90px 10px 55px auto;
+    grid-template-columns: 25px 64px 64px 64px 25px 105px 90px 45px 10px 55px auto;
     grid-gap: var(--space-4);
     align-items: center;
   }
@@ -60,7 +60,16 @@ const ProgressBar = styled.span`
   }
 `;
 
-const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
+const Driver = ({
+  racingNumber,
+  line,
+  lines,
+  pos,
+  DriverList,
+  CarData,
+  TimingAppData,
+  Position,
+}) => {
   const driver = DriverList[racingNumber];
   const carData =
     CarData.Entries[CarData.Entries.length - 1].Cars[racingNumber].Channels;
@@ -77,6 +86,29 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
         ? appData.Stints
         : Object.values(appData.Stints)
     )[appData.Stints.length - 1];
+  }
+
+  let distanceGap;
+  if (pos > 0) {
+    const positionData =
+      Position.Position[Position.Position.length - 1].Entries;
+    const driverPosition = positionData[racingNumber];
+    const [driverAhead] = lines[pos - 1];
+    const driverAheadPosition = positionData[driverAhead];
+
+    if (
+      driverPosition.Status === "OnTrack" &&
+      driverAheadPosition.Status === "OnTrack"
+    ) {
+      distanceGap =
+        Math.abs(
+          Math.sqrt(
+            (driverAheadPosition.X - driverPosition.X) ** 2 +
+              (driverAheadPosition.Y - driverPosition.Y) ** 2 +
+              (driverAheadPosition.Z - driverPosition.Z) ** 2
+          )
+        ) / 10;
+    }
   }
 
   return (
@@ -203,13 +235,22 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
           <br />
           Ldr {line.GapToLeader || "—"}
         </span>
+        <span>
+          Dst
+          <br />
+          {line.Position > 1 &&
+          Number(line.IntervalToPositionAhead?.Value) < 2 &&
+          distanceGap
+            ? `${distanceGap?.toFixed(1)} M`
+            : "—"}
+        </span>
         <span style={{ color: getTyreColour(currentStint?.Compound) }}>
           {currentStint?.Compound[0]}
         </span>
         <span>
-          Lap {line.NumberOfLaps}
+          Lap {line.NumberOfLaps ?? "—"}
           <br />
-          Stp {line.NumberOfPitStops}
+          Stp {line.NumberOfPitStops ?? "—"}
         </span>
         <span style={{ display: "flex" }}>
           {(Array.isArray(line.Sectors)
@@ -226,7 +267,6 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
                 <span
                   style={{
                     display: "flex",
-                    marginBottom: "var(--space-2)",
                   }}
                 >
                   {(Array.isArray(sector.Segments)
@@ -245,17 +285,21 @@ const Driver = ({ racingNumber, line, DriverList, CarData, TimingAppData }) => {
                     />
                   ))}
                 </span>
-                <span
-                  style={{
-                    color: sector.OverallFastest
-                      ? "magenta"
-                      : sector.PersonalFastest
-                      ? "limegreen"
-                      : "var(--colour-fg)",
-                  }}
-                >
-                  {sector.Value}
-                </span>
+                {sector.Value && (
+                  <span
+                    style={{
+                      color: sector.OverallFastest
+                        ? "magenta"
+                        : sector.PersonalFastest
+                        ? "limegreen"
+                        : "var(--colour-fg)",
+                      marginTop: "var(--space-2)",
+                      display: "inline-block",
+                    }}
+                  >
+                    {sector.Value}
+                  </span>
+                )}
               </span>
             );
           })}

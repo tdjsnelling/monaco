@@ -138,6 +138,8 @@ export default function Home() {
       </>
     );
 
+  console.log(liveState);
+
   return (
     <>
       <Head>
@@ -252,7 +254,6 @@ export default function Home() {
           </div>
           <ResponsiveTable
             style={{
-              borderBottom: "1px solid var(--colour-border)",
               gridTemplateColumns: !TimingData ? "1fr" : undefined,
             }}
           >
@@ -274,9 +275,12 @@ export default function Home() {
                             key={`timing-data-${racingNumber}`}
                             racingNumber={racingNumber}
                             line={line}
+                            lines={lines}
+                            pos={pos}
                             DriverList={DriverList}
                             CarData={CarData}
                             TimingAppData={TimingAppData}
+                            Position={Position}
                           />
                         ))}
                       </div>
@@ -288,9 +292,12 @@ export default function Home() {
                               key={`timing-data-${racingNumber}`}
                               racingNumber={racingNumber}
                               line={line}
+                              lines={lines}
+                              pos={pos}
                               DriverList={DriverList}
                               CarData={CarData}
                               TimingAppData={TimingAppData}
+                              Position={Position}
                             />
                           ))}
                       </div>
