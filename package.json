@@ -9,8 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "eslint": "8.35.0",
-    "eslint-config-next": "13.2.3",
     "moment": "^2.29.4",
     "next": "13.2.3",
     "react": "18.2.0",
@@ -22,6 +20,8 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "eslint": "8.35.0",
+    "eslint-config-next": "13.2.3",
     "nodemon": "^2.0.21",
     "prettier": "^2.8.4"
   }

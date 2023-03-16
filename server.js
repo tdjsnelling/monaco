@@ -15,6 +15,7 @@ const signalrUrl = "livetiming.formula1.com/signalr";
 const signalrHub = "Streaming";
 
 const socketFreq = 250;
+const retryFreq = 10000;
 
 let state = {};
 let messageCount = 0;
@@ -161,7 +162,7 @@ const setupStream = async (wss) => {
 
       setTimeout(() => {
         setupStream(wss);
-      }, 10000);
+      }, retryFreq);
     });
   } else {
     console.log("negotiation failed. is there a live session?");
@@ -170,23 +171,28 @@ const setupStream = async (wss) => {
 
     setTimeout(() => {
       setupStream(wss);
-    }, 10000);
+    }, retryFreq);
   }
 };
 
 app.prepare().then(async () => {
   const wss = new ws.WebSocketServer({ port: port + 1 });
 
+  const active = messageCount > 5 || dev;
+
   // Assume we have an active session after 5 messages
-  setInterval(() => {
-    wss.clients.forEach((s) => {
-      if (s.readyState === ws.OPEN) {
-        s.send(messageCount > 5 || dev ? JSON.stringify(state) : "{}", {
-          binary: false,
-        });
-      }
-    });
-  }, socketFreq);
+  setInterval(
+    () => {
+      wss.clients.forEach((s) => {
+        if (s.readyState === ws.OPEN) {
+          s.send(active ? JSON.stringify(state) : "{}", {
+            binary: false,
+          });
+        }
+      });
+    },
+    active ? socketFreq : retryFreq
+  );
 
   await setupStream(wss);
 
