@@ -176,7 +176,41 @@ const setupStream = async (wss) => {
 };
 
 app.prepare().then(async () => {
-  const wss = new ws.WebSocketServer({ port: port + 1 });
+  const wss = new ws.WebSocketServer({ noServer: true });
+
+  const server = createServer(async (req, res) => {
+    try {
+      const parsedUrl = parse(req.url, true);
+      await handle(req, res, parsedUrl);
+    } catch (err) {
+      console.error("Error occurred handling", req.url, err);
+      res.statusCode = 500;
+      res.end("internal server error");
+    }
+  });
+
+  server.on("upgrade", (req, socket, head) => {
+    const { pathname } = parse(req.url, true);
+    if (pathname === "/ws") {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit("connection", ws, req);
+      });
+    } else if (pathname === "/_next/webpack-hmr") {
+      // pass to Next HMR?
+      socket.destroy();
+    } else {
+      socket.destroy();
+    }
+  });
+
+  server.once("error", (err) => {
+    console.error(err);
+    process.exit(1);
+  });
+
+  server.listen(port, () => {
+    console.log(`> Ready on http://${hostname}:${port}`);
+  });
 
   const active = messageCount > 5 || dev;
 
@@ -221,22 +255,4 @@ app.prepare().then(async () => {
   // const testFile = fs.readFileSync("./2021_1_FP3.txt", "utf-8");
   // const testMessages = testFile.split("\n");
   // testSend(testMessages, 0);
-
-  createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true);
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      console.error("Error occurred handling", req.url, err);
-      res.statusCode = 500;
-      res.end("internal server error");
-    }
-  })
-    .once("error", (err) => {
-      console.error(err);
-      process.exit(1);
-    })
-    .listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
-    });
 });

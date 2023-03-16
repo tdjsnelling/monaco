@@ -25,7 +25,13 @@ export default function Home() {
       retry.current = undefined;
     }
 
-    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
+    const wsUrl =
+      `${window.location.protocol.replace("http", "ws")}//` +
+      window.location.hostname +
+      (window.location.port ? `:${window.location.port}` : "") +
+      "/ws";
+
+    const ws = new WebSocket(wsUrl);
 
     ws.addEventListener("open", () => {
       setConnected(true);
@@ -44,7 +50,7 @@ export default function Home() {
     });
 
     ws.addEventListener("message", ({ data }) => {
-      handleMessage(ws, data);
+      handleMessage(data);
     });
 
     socket.current = ws;
@@ -52,7 +58,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!connected) {
-      initWebsocket((ws, data) => {
+      initWebsocket((data) => {
         try {
           const d = JSON.parse(data);
           setLiveState(d);
