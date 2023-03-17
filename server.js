@@ -215,11 +215,10 @@ app.prepare().then(async () => {
     console.log(`> Ready on http://${hostname}:${port}`);
   });
 
-  const active = messageCount > 5 || dev;
-
   // Assume we have an active session after 5 messages
   setInterval(
     () => {
+      const active = messageCount > 5 || dev;
       wss.clients.forEach((s) => {
         if (s.readyState === ws.OPEN) {
           s.send(active ? JSON.stringify(state) : "{}", {

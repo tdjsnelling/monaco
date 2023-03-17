@@ -218,7 +218,7 @@ const Driver = ({
                 : "var(--colour-fg)",
             }}
           >
-            {line.LastLapTime?.Value}
+            {line.LastLapTime?.Value ?? "—"}
           </span>
           <br />
           Bst{" "}
@@ -229,7 +229,7 @@ const Driver = ({
                 : "var(--colour-fg)",
             }}
           >
-            {line.BestLapTime?.Value}
+            {line.BestLapTime?.Value ?? "—"}
           </span>
         </span>
         <span>
@@ -303,7 +303,7 @@ const Driver = ({
                         ? "magenta"
                         : sector.PersonalFastest
                         ? "limegreen"
-                        : "var(--colour-fg)",
+                        : "yellow",
                       marginTop: "var(--space-2)",
                       display: "inline-block",
                     }}
