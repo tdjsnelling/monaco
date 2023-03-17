@@ -216,19 +216,18 @@ app.prepare().then(async () => {
   });
 
   // Assume we have an active session after 5 messages
-  setInterval(
-    () => {
-      const active = messageCount > 5 || dev;
-      wss.clients.forEach((s) => {
-        if (s.readyState === ws.OPEN) {
-          s.send(active ? JSON.stringify(state) : "{}", {
-            binary: false,
-          });
-        }
-      });
-    },
-    active ? socketFreq : retryFreq
-  );
+  let active;
+
+  setInterval(() => {
+    active = messageCount > 5 || dev;
+    wss.clients.forEach((s) => {
+      if (s.readyState === ws.OPEN) {
+        s.send(active ? JSON.stringify(state) : "{}", {
+          binary: false,
+        });
+      }
+    });
+  }, socketFreq);
 
   await setupStream(wss);
 
