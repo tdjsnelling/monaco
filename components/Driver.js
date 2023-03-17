@@ -55,7 +55,7 @@ const ProgressBar = styled.span`
   > span {
     display: block;
     height: 4px;
-    transition: width 200ms linear;
+    transition: width 100ms linear;
   }
 `;
 

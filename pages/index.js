@@ -95,6 +95,11 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
+            <img
+              src="/flag-light.png"
+              alt="Checkered flag icon"
+              style={{ width: "24px", marginBottom: "var(--space-4)" }}
+            />
             <p style={{ marginBottom: "var(--space-4)" }}>
               <strong>NO CONNECTION</strong>
             </p>
@@ -138,6 +143,11 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
+            <img
+              src="/flag-light.png"
+              alt="Checkered flag icon"
+              style={{ width: "24px", marginBottom: "var(--space-4)" }}
+            />
             <p style={{ marginBottom: "var(--space-4)" }}>
               <strong>NO SESSION</strong>
             </p>
@@ -146,6 +156,21 @@ export default function Home() {
         </main>
       </>
     );
+
+  const extrapolatedTimeRemaining =
+    ExtrapolatedClock.Utc && ExtrapolatedClock.Remaining
+      ? moment
+          .utc(
+            Math.max(
+              moment
+                .duration(ExtrapolatedClock.Remaining)
+                .subtract(moment().diff(moment(ExtrapolatedClock.Utc)))
+                .asMilliseconds(),
+              0
+            )
+          )
+          .format("HH:mm:ss")
+      : undefined;
 
   return (
     <>
@@ -195,9 +220,9 @@ export default function Home() {
                   Lap: {LapCount.CurrentLap}/{LapCount.TotalLaps}
                 </p>
               )}
-              {!!ExtrapolatedClock && (
+              {!!extrapolatedTimeRemaining && (
                 <p style={{ marginRight: "var(--space-4)" }}>
-                  Remaining: {ExtrapolatedClock.Remaining}
+                  Remaining: {extrapolatedTimeRemaining}
                 </p>
               )}
             </div>

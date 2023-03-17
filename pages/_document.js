@@ -14,6 +14,16 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
           rel="stylesheet"
         />
+        <link
+          href="/flag-dark.png"
+          rel="icon"
+          media="(prefers-color-scheme: light)"
+        />
+        <link
+          href="/flag-light.png"
+          rel="icon"
+          media="(prefers-color-scheme: dark)"
+        />
       </Head>
       <body>
         <Main />
