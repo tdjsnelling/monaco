@@ -15,6 +15,7 @@ const sortPosition = (a, b) => {
 export default function Home() {
   const [connected, setConnected] = useState(false);
   const [liveState, setLiveState] = useState({});
+  const [updated, setUpdated] = useState(new Date());
 
   const socket = useRef();
   const retry = useRef();
@@ -62,6 +63,7 @@ export default function Home() {
         try {
           const d = JSON.parse(data);
           setLiveState(d);
+          setUpdated(new Date());
         } catch (e) {
           console.error(`could not process message: ${e}`);
         }
@@ -205,7 +207,7 @@ export default function Home() {
               }}
             >
               <p style={{ marginRight: "var(--space-4)" }}>
-                Data updated: {moment(Heartbeat.Utc).format("HH:mm:ss")}
+                Data updated: {moment(updated).format("HH:mm:ss.SSS")}
               </p>
               <p style={{ color: "limegreen", marginRight: "var(--space-4)" }}>
                 CONNECTED

@@ -1,8 +1,7 @@
 import styled from "styled-components";
 
-const drsEnabledValues = [8, 10, 12, 14];
+const drsEnabledValues = [10, 12, 14];
 
-// one of 2048, 2064, 2051, 2049
 const getSegmentColour = (status) => {
   switch (status) {
     case 2048:
@@ -41,7 +40,7 @@ const DriverItem = styled.div`
     padding: 0 var(--space-3);
     height: 50px;
     display: grid;
-    grid-template-columns: 25px 64px 64px 64px 25px 105px 90px 45px 10px 55px auto;
+    grid-template-columns: 21px 64px 64px 64px 21px 90px 90px 45px 10px 45px auto;
     grid-gap: var(--space-4);
     align-items: center;
   }
@@ -82,11 +81,8 @@ const Driver = ({
   const appData = TimingAppData?.Lines[racingNumber];
   let currentStint;
   if (appData?.Stints) {
-    currentStint = (
-      Array.isArray(appData.Stints)
-        ? appData.Stints
-        : Object.values(appData.Stints)
-    )[appData.Stints.length - 1];
+    const stints = Object.values(appData.Stints);
+    currentStint = stints[stints.length - 1];
   }
 
   let distanceGap;
@@ -218,18 +214,21 @@ const Driver = ({
                 : "var(--colour-fg)",
             }}
           >
-            {line.LastLapTime?.Value ?? "—"}
+            {line.LastLapTime?.Value || "—"}
           </span>
           <br />
           Bst{" "}
           <span
             style={{
-              color: line.BestLapTime?.OverallFastest
-                ? "magenta"
-                : "var(--colour-fg)",
+              color:
+                line.BestLapTime?.OverallFastest ||
+                TimingStats.Lines[racingNumber]?.PersonalBestLapTime
+                  ?.Position === 1
+                  ? "magenta"
+                  : "var(--colour-fg)",
             }}
           >
-            {line.BestLapTime?.Value ?? "—"}
+            {line.BestLapTime?.Value || "—"}
           </span>
         </span>
         <span>
@@ -256,7 +255,7 @@ const Driver = ({
             : "—"}
         </span>
         <span style={{ color: getTyreColour(currentStint?.Compound) }}>
-          {currentStint?.Compound[0]}
+          {currentStint?.Compound[0] ?? "—"}
         </span>
         <span>
           Lap {line.NumberOfLaps ?? "—"}
