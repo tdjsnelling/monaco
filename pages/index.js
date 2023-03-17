@@ -159,26 +159,26 @@ export default function Home() {
 
   const extrapolatedTimeRemaining =
     ExtrapolatedClock.Utc && ExtrapolatedClock.Remaining
-      ? moment
-          .utc(
-            Math.max(
-              moment
-                .duration(ExtrapolatedClock.Remaining)
-                .subtract(moment().diff(moment(ExtrapolatedClock.Utc)))
-                .asMilliseconds(),
-              0
+      ? ExtrapolatedClock.Extrapolating
+        ? moment
+            .utc(
+              Math.max(
+                moment
+                  .duration(ExtrapolatedClock.Remaining)
+                  .subtract(moment().diff(moment(ExtrapolatedClock.Utc)))
+                  .asMilliseconds(),
+                0
+              )
             )
-          )
-          .format("HH:mm:ss")
+            .format("HH:mm:ss")
+        : ExtrapolatedClock.Remaining
       : undefined;
 
   return (
     <>
       <Head>
         <title>
-          {SessionInfo
-            ? `${SessionInfo.Name} – ${SessionInfo.Meeting.Circuit.ShortName}`
-            : "No event"}
+          {SessionInfo.Meeting.Circuit.ShortName}: {SessionInfo.Name}
         </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
