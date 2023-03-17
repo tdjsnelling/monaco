@@ -116,6 +116,8 @@ const setupStream = async (wss) => {
       console.log("websocket open");
 
       state = {};
+      messageCount = 0;
+      emptyMessageCount = {};
 
       socket.send(
         JSON.stringify({
@@ -159,6 +161,7 @@ const setupStream = async (wss) => {
       console.log("socket close");
       state = {};
       messageCount = 0;
+      emptyMessageCount = {};
 
       setTimeout(() => {
         setupStream(wss);
