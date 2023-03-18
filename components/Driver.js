@@ -108,6 +108,8 @@ const Driver = ({
     }
   }
 
+  const lineStats = Object.values(line.Stats ?? {});
+
   return (
     <DriverItem>
       <div
@@ -207,11 +209,12 @@ const Driver = ({
           Lst{" "}
           <span
             style={{
-              color: line.LastLapTime?.OverallFastest
-                ? "magenta"
-                : line.LastLapTime?.PersonalFastest
-                ? "limegreen"
-                : "var(--colour-fg)",
+              color:
+                line.LastLapTime?.Value && line.LastLapTime?.OverallFastest
+                  ? "magenta"
+                  : line.LastLapTime?.Value && line.LastLapTime?.PersonalFastest
+                  ? "limegreen"
+                  : "var(--colour-fg)",
             }}
           >
             {line.LastLapTime?.Value || "—"}
@@ -221,9 +224,10 @@ const Driver = ({
           <span
             style={{
               color:
-                line.BestLapTime?.OverallFastest ||
-                TimingStats.Lines[racingNumber]?.PersonalBestLapTime
-                  ?.Position === 1
+                line.BestLapTime?.Value &&
+                (line.BestLapTime?.OverallFastest ||
+                  TimingStats.Lines[racingNumber]?.PersonalBestLapTime
+                    ?.Position === 1)
                   ? "magenta"
                   : "var(--colour-fg)",
             }}
@@ -240,10 +244,15 @@ const Driver = ({
                 : "var(--colour-fg)",
             }}
           >
-            {line.IntervalToPositionAhead?.Value || "—"}
+            {line.IntervalToPositionAhead?.Value ||
+              lineStats?.[lineStats?.length - 1]?.TimeDifftoPositionAhead ||
+              "—"}
           </span>
           <br />
-          Ldr {line.GapToLeader || "—"}
+          Ldr{" "}
+          {line.GapToLeader ||
+            lineStats?.[lineStats?.length - 1]?.TimeDiffToFastest ||
+            "—"}
         </span>
         <span>
           Dst
