@@ -3,6 +3,7 @@ import Head from "next/head";
 import moment from "moment";
 import ResponsiveTable from "@monaco/components/ResponsiveTable";
 import Driver from "@monaco/components/Driver";
+import Input from "@monaco/components/Input";
 
 const sortPosition = (a, b) => {
   const [, aLine] = a;
@@ -12,10 +13,29 @@ const sortPosition = (a, b) => {
   return aPos - bPos;
 };
 
+const getFlagColour = (flag) => {
+  switch (flag?.toLowerCase()) {
+    case "green":
+      return { bg: "green" };
+    case "yellow":
+    case "double yellow":
+      return { bg: "yellow", fg: "var(--colour-bg)" };
+    case "red":
+      return { bg: "red" };
+    default:
+      return { bg: "transparent" };
+  }
+};
+
 export default function Home() {
   const [connected, setConnected] = useState(false);
   const [liveState, setLiveState] = useState({});
   const [updated, setUpdated] = useState(new Date());
+  const [delayMs, setDelayMs] = useState(0);
+  const [delayTarget, setDelayTarget] = useState(0);
+  const [blocking, setBlocking] = useState(false);
+  const [triggerConnection, setTriggerConnection] = useState(0);
+  const [triggerTick, setTriggerTick] = useState(0);
 
   const socket = useRef();
   const retry = useRef();
@@ -40,10 +60,12 @@ export default function Home() {
 
     ws.addEventListener("close", () => {
       setConnected(false);
-      if (!retry.current)
-        retry.current = window.setTimeout(() => {
-          initWebsocket(handleMessage);
-        }, 1000);
+      setBlocking((isBlocking) => {
+        if (!retry.current && !isBlocking)
+          retry.current = window.setTimeout(() => {
+            initWebsocket(handleMessage);
+          }, 1000);
+      });
     });
 
     ws.addEventListener("error", () => {
@@ -51,31 +73,52 @@ export default function Home() {
     });
 
     ws.addEventListener("message", ({ data }) => {
-      handleMessage(data);
+      setTimeout(() => {
+        handleMessage(data);
+      }, delayMs);
     });
 
     socket.current = ws;
   };
 
   useEffect(() => {
-    if (!connected) {
-      initWebsocket((data) => {
-        try {
-          const d = JSON.parse(data);
-          setLiveState(d);
-          setUpdated(new Date());
-        } catch (e) {
-          console.error(`could not process message: ${e}`);
-        }
-      });
+    setLiveState({});
+    setBlocking(false);
+    initWebsocket((data) => {
+      try {
+        const d = JSON.parse(data);
+        setLiveState(d);
+        setUpdated(new Date());
+      } catch (e) {
+        console.error(`could not process message: ${e}`);
+      }
+    });
+  }, [triggerConnection]);
+
+  useEffect(() => {
+    if (blocking) {
+      socket.current?.close();
+      setTimeout(() => {
+        setTriggerConnection((n) => n + 1);
+      }, 100);
     }
-  }, []);
+  }, [blocking]);
+
+  useEffect(() => {
+    let interval;
+    if (Date.now() < delayTarget) {
+      interval = setInterval(() => {
+        setTriggerTick((n) => n + 1);
+        if (Date.now() >= delayTarget) clearInterval(interval);
+      }, 250);
+    }
+  }, [delayTarget]);
 
   const messageCount =
     Object.values(liveState?.RaceControlMessages?.Messages ?? []).length +
     Object.values(liveState?.SessionData?.StatusSeries ?? []).length;
   useEffect(() => {
-    new Audio("/notif.mp3").play();
+    if (messageCount > 0) new Audio("/notif.mp3").play();
   }, [messageCount]);
 
   if (!connected)
@@ -95,15 +138,36 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
-            <img
-              src="/flag-light.png"
-              alt="Checkered flag icon"
-              style={{ width: "24px", marginBottom: "var(--space-4)" }}
-            />
             <p style={{ marginBottom: "var(--space-4)" }}>
               <strong>NO CONNECTION</strong>
             </p>
             <button onClick={() => window.location.reload()}>RELOAD</button>
+          </div>
+        </main>
+      </>
+    );
+
+  if (Date.now() < delayTarget)
+    return (
+      <>
+        <Head>
+          <title>Syncing</title>
+        </Head>
+        <main>
+          <div
+            style={{
+              width: "100vw",
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <p style={{ marginBottom: "var(--space-4)" }}>
+              <strong>SYNCING...</strong>
+            </p>
+            <p>{(delayTarget - Date.now()) / 1000} sec</p>
           </div>
         </main>
       </>
@@ -143,11 +207,6 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
-            <img
-              src="/flag-light.png"
-              alt="Checkered flag icon"
-              style={{ width: "24px", marginBottom: "var(--space-4)" }}
-            />
             <p style={{ marginBottom: "var(--space-4)" }}>
               <strong>NO SESSION</strong>
             </p>
@@ -166,7 +225,7 @@ export default function Home() {
                 moment
                   .duration(ExtrapolatedClock.Remaining)
                   .subtract(moment().diff(moment(ExtrapolatedClock.Utc)))
-                  .asMilliseconds(),
+                  .asMilliseconds() + delayMs,
                 0
               )
             )
@@ -237,6 +296,26 @@ export default function Home() {
               <p style={{ color: "limegreen", marginRight: "var(--space-4)" }}>
                 CONNECTED
               </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = new FormData(e.target);
+                  const delayMsValue = Number(form.get("delayMs"));
+                  setBlocking(true);
+                  setDelayMs(delayMsValue);
+                  setDelayTarget(Date.now() + delayMsValue);
+                }}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <p style={{ marginRight: "var(--space-2)" }}>Delay</p>
+                <Input
+                  type="number"
+                  name="delayMs"
+                  defaultValue={delayMs}
+                  style={{ width: "75px", marginRight: "var(--space-2)" }}
+                />
+                <p style={{ marginRight: "var(--space-4)" }}>ms</p>
+              </form>
               <a
                 href="https://github.com/tdjsnelling/monaco"
                 target="_blank"
@@ -406,7 +485,10 @@ export default function Home() {
                       {event.Category === "Flag" && (
                         <span
                           style={{
-                            backgroundColor: event.Flag?.toLowerCase(),
+                            backgroundColor: getFlagColour(event.Flag).bg,
+                            color:
+                              getFlagColour(event.Flag).fg ??
+                              "var(--colour-fg)",
                             border: "1px solid var(--colour-border)",
                             borderRadius: "var(--space-1)",
                             padding: "0 var(--space-2)",
