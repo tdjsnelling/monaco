@@ -3,7 +3,10 @@ import Head from "next/head";
 import moment from "moment";
 import ResponsiveTable from "@monaco/components/ResponsiveTable";
 import Driver from "@monaco/components/Driver";
+import Radio from "@monaco/components/Radio";
 import Input from "@monaco/components/Input";
+
+const f1Url = "https://livetiming.formula1.com";
 
 const sortPosition = (a, b) => {
   const [, aLine] = a;
@@ -11,6 +14,14 @@ const sortPosition = (a, b) => {
   const aPos = Number(aLine.Position);
   const bPos = Number(bLine.Position);
   return aPos - bPos;
+};
+
+const sortUtc = (a, b) => {
+  const aDate = new Date(a.Utc);
+  const bDate = new Date(b.Utc);
+  if (aDate < bDate) return 1;
+  if (aDate > bDate) return -1;
+  return 0;
 };
 
 const getFlagColour = (flag) => {
@@ -118,7 +129,8 @@ export default function Home() {
 
   const messageCount =
     Object.values(liveState?.RaceControlMessages?.Messages ?? []).length +
-    Object.values(liveState?.SessionData?.StatusSeries ?? []).length;
+    Object.values(liveState?.SessionData?.StatusSeries ?? []).length +
+    Object.values(liveState?.TeamRadio?.Captures ?? []).length;
   useEffect(() => {
     if (messageCount > 0) new Audio("/notif.mp3").play();
   }, [messageCount]);
@@ -190,6 +202,7 @@ export default function Home() {
     TimingStats,
     CarData,
     Position,
+    TeamRadio,
   } = liveState;
 
   if (!Heartbeat)
@@ -435,7 +448,7 @@ export default function Home() {
         </div>
 
         <ResponsiveTable
-          cols="2fr 1fr"
+          cols="2fr 1fr 1fr"
           style={{
             borderBottom: "1px solid var(--colour-border)",
           }}
@@ -519,6 +532,61 @@ export default function Home() {
               width: "100%",
               display: "flex",
               flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                padding: "var(--space-2) var(--space-3)",
+                backgroundColor: "var(--colour-offset)",
+              }}
+            >
+              <p>
+                <strong>TEAM RADIO</strong>
+              </p>
+            </div>
+            {!!TeamRadio ? (
+              <ul
+                style={{
+                  listStyle: "none",
+                  height: "100px",
+                  overflow: "auto",
+                  flexGrow: 1,
+                }}
+              >
+                {[...Object.values(TeamRadio.Captures).sort(sortUtc)].map(
+                  (radio, i) => {
+                    const driver = DriverList[radio.RacingNumber];
+                    return (
+                      <Radio
+                        key={`team-radio-${radio.Utc}-${i}`}
+                        radio={radio}
+                        path={`${f1Url}/static/${SessionInfo.Path}${radio.Path}`}
+                        driver={driver}
+                      />
+                    );
+                  }
+                )}
+              </ul>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                }}
+              >
+                <p>NO DATA YET</p>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              borderRight: "1px solid var(--colour-border)",
             }}
           >
             <div
