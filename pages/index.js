@@ -22,6 +22,8 @@ const getFlagColour = (flag) => {
       return { bg: "yellow", fg: "var(--colour-bg)" };
     case "red":
       return { bg: "red" };
+    case "blue":
+      return { bg: "blue" };
     default:
       return { bg: "transparent" };
   }
@@ -465,11 +467,7 @@ export default function Home() {
                   flexGrow: 1,
                 }}
               >
-                {[
-                  ...(Array.isArray(RaceControlMessages.Messages)
-                    ? RaceControlMessages.Messages
-                    : Object.values(RaceControlMessages.Messages)),
-                ]
+                {[...Object.values(RaceControlMessages.Messages)]
                   .reverse()
                   .map((event, i) => (
                     <li
@@ -542,11 +540,7 @@ export default function Home() {
                   flexGrow: 1,
                 }}
               >
-                {[
-                  ...(Array.isArray(SessionData.StatusSeries)
-                    ? SessionData.StatusSeries
-                    : Object.values(SessionData.StatusSeries)),
-                ]
+                {[...Object.values(SessionData.StatusSeries)]
                   .reverse()
                   .map((event, i) => (
                     <li

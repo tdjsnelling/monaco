@@ -3,7 +3,6 @@ const { parse } = require("url");
 const next = require("next");
 const ws = require("ws");
 const zlib = require("zlib");
-const fs = require("fs");
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -230,30 +229,4 @@ app.prepare().then(async () => {
   }, socketFreq);
 
   await setupStream(wss);
-
-  // const testSend = (m, i) => {
-  //   setTimeout(() => {
-  //     console.log(i);
-  //     updateState(
-  //       JSON.stringify({
-  //         M: [
-  //           {
-  //             M: "feed",
-  //             A: JSON.parse(
-  //               m[i]
-  //                 .replaceAll("'", '"')
-  //                 .replaceAll("True", "true")
-  //                 .replaceAll("False", "false")
-  //             ),
-  //           },
-  //         ],
-  //       })
-  //     );
-  //     testSend(m, i + 1);
-  //   }, 50);
-  // };
-  //
-  // const testFile = fs.readFileSync("./2021_1_FP3.txt", "utf-8");
-  // const testMessages = testFile.split("\n");
-  // testSend(testMessages, 0);
 });

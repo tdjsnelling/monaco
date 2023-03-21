@@ -43,6 +43,7 @@ const DriverItem = styled.div`
     grid-template-columns: 21px 64px 64px 64px 21px 90px 90px 45px 10px 45px auto;
     grid-gap: var(--space-4);
     align-items: center;
+    //border-left: 5px solid ${({ teamColour }) => teamColour};
   }
 `;
 
@@ -111,7 +112,9 @@ const Driver = ({
   const lineStats = Object.values(line.Stats ?? {});
 
   return (
-    <DriverItem>
+    <DriverItem
+      teamColour={driver?.TeamColour ? `#${driver.TeamColour}` : undefined}
+    >
       <div
         style={{
           opacity: line.KnockedOut || line.Retired || line.Stopped ? 0.5 : 1,
@@ -259,7 +262,10 @@ const Driver = ({
           <br />
           {line.Position > 1 &&
           Number(line.IntervalToPositionAhead?.Value) < 2 &&
-          distanceGap
+          distanceGap < 200 &&
+          !line.KnockedOut &&
+          !line.Retired &&
+          !line.Stopped
             ? `${distanceGap?.toFixed(1)} M`
             : "—"}
         </span>
