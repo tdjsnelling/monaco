@@ -40,7 +40,7 @@ const DriverItem = styled.div`
     padding: 0 var(--space-3);
     height: 50px;
     display: grid;
-    grid-template-columns: 21px 64px 64px 64px 21px 90px 90px 45px 10px 45px auto;
+    grid-template-columns: 21px 64px 64px 64px 21px 90px 90px 10px 45px auto;
     grid-gap: var(--space-4);
     align-items: center;
     //border-left: 5px solid ${({ teamColour }) => teamColour};
@@ -63,13 +63,10 @@ const ProgressBar = styled.span`
 const Driver = ({
   racingNumber,
   line,
-  lines,
-  pos,
   DriverList,
   CarData,
   TimingAppData,
   TimingStats,
-  Position,
 }) => {
   const driver = DriverList[racingNumber];
   const carData =
@@ -84,29 +81,6 @@ const Driver = ({
   if (appData?.Stints) {
     const stints = Object.values(appData.Stints);
     currentStint = stints[stints.length - 1];
-  }
-
-  let distanceGap;
-  if (pos > 0) {
-    const positionData =
-      Position.Position[Position.Position.length - 1].Entries;
-    const driverPosition = positionData[racingNumber];
-    const [driverAhead] = lines[pos - 1];
-    const driverAheadPosition = positionData[driverAhead];
-
-    if (
-      driverPosition.Status === "OnTrack" &&
-      driverAheadPosition.Status === "OnTrack"
-    ) {
-      distanceGap =
-        Math.abs(
-          Math.sqrt(
-            (driverAheadPosition.X - driverPosition.X) ** 2 +
-              (driverAheadPosition.Y - driverPosition.Y) ** 2 +
-              (driverAheadPosition.Z - driverPosition.Z) ** 2
-          )
-        ) / 10;
-    }
   }
 
   const lineStats = Object.values(line.Stats ?? {});
@@ -256,18 +230,6 @@ const Driver = ({
           {line.GapToLeader ||
             lineStats?.[lineStats?.length - 1]?.TimeDiffToFastest ||
             "—"}
-        </span>
-        <span>
-          Dst
-          <br />
-          {line.Position > 1 &&
-          Number(line.IntervalToPositionAhead?.Value) < 2 &&
-          distanceGap < 200 &&
-          !line.KnockedOut &&
-          !line.Retired &&
-          !line.Stopped
-            ? `${distanceGap?.toFixed(1)} M`
-            : "—"}
         </span>
         <span style={{ color: getTyreColour(currentStint?.Compound) }}>
           {currentStint?.Compound[0] ?? "—"}

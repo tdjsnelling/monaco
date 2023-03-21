@@ -29,10 +29,11 @@ const Radio = ({ radio, path, driver }) => {
 
     if (audioRef.current) {
       audioRef.current.addEventListener("ended", handleEnd);
-      return () => {
-        audioRef.current.removeEventListener("ended", handleEnd);
-      };
     }
+
+    return () => {
+      audioRef.current?.removeEventListener("ended", handleEnd);
+    };
   }, []);
 
   useEffect(() => {

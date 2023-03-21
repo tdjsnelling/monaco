@@ -4,6 +4,7 @@ import moment from "moment";
 import ResponsiveTable from "@monaco/components/ResponsiveTable";
 import Driver from "@monaco/components/Driver";
 import Radio from "@monaco/components/Radio";
+import Map from "@monaco/components/Map";
 import Input from "@monaco/components/Input";
 
 const f1Url = "https://livetiming.formula1.com";
@@ -396,18 +397,15 @@ export default function Home() {
                           borderRight: "1px solid var(--colour-border)",
                         }}
                       >
-                        {lines.slice(0, 10).map(([racingNumber, line], pos) => (
+                        {lines.slice(0, 10).map(([racingNumber, line]) => (
                           <Driver
                             key={`timing-data-${racingNumber}`}
                             racingNumber={racingNumber}
                             line={line}
-                            lines={lines}
-                            pos={pos}
                             DriverList={DriverList}
                             CarData={CarData}
                             TimingAppData={TimingAppData}
                             TimingStats={TimingStats}
-                            Position={Position}
                           />
                         ))}
                       </div>
@@ -419,13 +417,10 @@ export default function Home() {
                               key={`timing-data-${racingNumber}`}
                               racingNumber={racingNumber}
                               line={line}
-                              lines={lines}
-                              pos={pos}
                               DriverList={DriverList}
                               CarData={CarData}
                               TimingAppData={TimingAppData}
                               TimingStats={TimingStats}
-                              Position={Position}
                             />
                           ))}
                       </div>
@@ -448,11 +443,30 @@ export default function Home() {
         </div>
 
         <ResponsiveTable
-          cols="2fr 1fr 1fr"
+          cols="2fr 2fr 1fr"
           style={{
             borderBottom: "1px solid var(--colour-border)",
           }}
         >
+          <div style={{ borderRight: "1px solid var(--colour-border)" }}>
+            <div
+              style={{
+                padding: "var(--space-2) var(--space-3)",
+                backgroundColor: "var(--colour-offset)",
+              }}
+            >
+              <p>
+                <strong>TRACK</strong>
+              </p>
+            </div>
+            <Map
+              circuit={SessionInfo.Meeting.Circuit.Key}
+              Position={Position.Position[Position.Position.length - 1]}
+              DriverList={DriverList}
+              TimingData={TimingData}
+            />
+          </div>
+
           <div
             style={{
               width: "100%",
@@ -475,7 +489,7 @@ export default function Home() {
               <ul
                 style={{
                   listStyle: "none",
-                  height: "100px",
+                  height: "200px",
                   overflow: "auto",
                   flexGrow: 1,
                 }}
@@ -548,7 +562,7 @@ export default function Home() {
               <ul
                 style={{
                   listStyle: "none",
-                  height: "100px",
+                  height: "200px",
                   overflow: "auto",
                   flexGrow: 1,
                 }}
@@ -566,72 +580,6 @@ export default function Home() {
                     );
                   }
                 )}
-              </ul>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                }}
-              >
-                <p>NO DATA YET</p>
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              borderRight: "1px solid var(--colour-border)",
-            }}
-          >
-            <div
-              style={{
-                padding: "var(--space-2) var(--space-3)",
-                backgroundColor: "var(--colour-offset)",
-              }}
-            >
-              <p>
-                <strong>SESSION STATUS MESSAGES</strong>
-              </p>
-            </div>
-            {!!SessionData ? (
-              <ul
-                style={{
-                  listStyle: "none",
-                  height: "100px",
-                  overflow: "auto",
-                  flexGrow: 1,
-                }}
-              >
-                {[...Object.values(SessionData.StatusSeries)]
-                  .reverse()
-                  .map((event, i) => (
-                    <li
-                      key={`status-series-${event.Utc}-${i}`}
-                      style={{ padding: "var(--space-3)" }}
-                    >
-                      <span
-                        style={{ color: "grey", marginRight: "var(--space-4)" }}
-                      >
-                        {moment(event.Utc).format("HH:mm:ss")}
-                      </span>
-                      {Object.entries(event).map(([k, v]) =>
-                        k !== "Utc" ? (
-                          <span
-                            key={`status-series-${event.Utc}-${k}`}
-                            style={{ marginRight: "var(--space-4)" }}
-                          >
-                            {k}: {v}
-                          </span>
-                        ) : null
-                      )}
-                    </li>
-                  ))}
               </ul>
             ) : (
               <div
