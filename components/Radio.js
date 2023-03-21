@@ -40,7 +40,6 @@ const Radio = ({ radio, path, driver }) => {
       audioRef.current.play();
       intervalRef.current = setInterval(() => {
         setProgress(audioRef.current.currentTime);
-        console.log("tick");
       }, 100);
     }
     if (!playing && typeof audioRef.current?.pause === "function") {
