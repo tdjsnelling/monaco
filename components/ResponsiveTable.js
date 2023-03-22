@@ -6,7 +6,7 @@ export default styled.div`
   min-height: 450px;
   overflow-x: auto;
 
-  @media screen and (min-width: 1700px) {
+  @media screen and (min-width: 1600px) {
     grid-template-columns: ${({ cols }) => cols ?? "50% 50%"};
   }
 `;

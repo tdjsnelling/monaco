@@ -494,15 +494,22 @@ export default function Home() {
                   flexGrow: 1,
                 }}
               >
-                {[...Object.values(RaceControlMessages.Messages)]
-                  .reverse()
+                {[
+                  ...Object.values(RaceControlMessages.Messages),
+                  ...Object.values(SessionData.StatusSeries),
+                ]
+                  .sort(sortUtc)
                   .map((event, i) => (
                     <li
                       key={`race-control-${event.Utc}-${i}`}
-                      style={{ padding: "var(--space-3)" }}
+                      style={{ padding: "var(--space-3)", display: "flex" }}
                     >
                       <span
-                        style={{ color: "grey", marginRight: "var(--space-4)" }}
+                        style={{
+                          color: "grey",
+                          whiteSpace: "nowrap",
+                          marginRight: "var(--space-4)",
+                        }}
                       >
                         {moment(event.Utc).format("HH:mm:ss")}
                         {event.Lap && ` / Lap ${event.Lap}`}
@@ -523,7 +530,13 @@ export default function Home() {
                           FLAG
                         </span>
                       )}
-                      <span>{event.Message.trim()}</span>
+                      {event.Message && <span>{event.Message.trim()}</span>}
+                      {event.TrackStatus && (
+                        <span>TrackStatus: {event.TrackStatus}</span>
+                      )}
+                      {event.SessionStatus && (
+                        <span>SessionStatus: {event.SessionStatus}</span>
+                      )}
                     </li>
                   ))}
               </ul>

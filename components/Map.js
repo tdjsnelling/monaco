@@ -64,12 +64,14 @@ const Map = ({ circuit, Position, DriverList, TimingData }) => {
                 cy={pos.Y}
                 r={(stroke * 2) / (onTrack ? 1 : 2)}
                 fill={`#${driver.TeamColour}`}
+                style={{ transition: "200ms linear" }}
               />
               <text
                 x={pos.X + stroke * 2 + 100}
                 y={pos.Y + (stroke * 2) / 1.25}
                 fill={`#${driver.TeamColour}`}
                 fontSize={stroke * 4}
+                style={{ transition: "200ms linear" }}
               >
                 {driver.Tla}
               </text>
