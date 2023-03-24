@@ -83,7 +83,7 @@ const updateState = (data) => {
 };
 
 const setupStream = async (wss) => {
-  console.log("connecting to live timing stream...");
+  console.log(`[${signalrUrl}] Connecting to live timing stream`);
 
   const hub = encodeURIComponent(JSON.stringify([{ name: signalrHub }]));
   const negotiation = await fetch(
@@ -95,7 +95,7 @@ const setupStream = async (wss) => {
   const { ConnectionToken } = await negotiation.json();
 
   if (cookie && ConnectionToken) {
-    console.log("negotiation complete");
+    console.log(`[${signalrUrl}] HTTP negotiation complete`);
 
     const socket = new ws(
       `wss://${signalrUrl}/connect?clientProtocol=1.5&transport=webSockets&connectionToken=${encodeURIComponent(
@@ -112,7 +112,7 @@ const setupStream = async (wss) => {
     );
 
     socket.on("open", () => {
-      console.log("websocket open");
+      console.log(`[${signalrUrl}] WebSocket open`);
 
       state = {};
       messageCount = 0;
@@ -167,7 +167,9 @@ const setupStream = async (wss) => {
       }, retryFreq);
     });
   } else {
-    console.log("negotiation failed. is there a live session?");
+    console.log(
+      `[${signalrUrl}] HTTP negotiation failed. Is there a live session?`
+    );
     state = {};
     messageCount = 0;
 
@@ -211,7 +213,7 @@ app.prepare().then(async () => {
   });
 
   server.listen(port, () => {
-    console.log(`ready on http://${hostname}:${port}`);
+    console.log(`Monaco server ready on http://${hostname}:${port}`);
   });
 
   // Assume we have an active session after 5 messages
