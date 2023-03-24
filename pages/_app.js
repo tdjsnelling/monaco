@@ -7,6 +7,8 @@ const GlobalStyle = createGlobalStyle`
     --space-2: 4px;
     --space-3: 8px;
     --space-4: 16px;
+    --space-5: 32px;
+    --space-6: 64px;
     
     --colour-bg: #000;
     --colour-fg: #f0f0f0;

@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const StyledMap = styled.div`
-  padding: var(--space-4);
-`;
+const StyledMap = styled.div(
+  ({ expanded }) => `
+  background-color: var(--colour-bg);
+  padding: ${expanded ? "var(--space-6)" : "var(--space-4)"};
+  position: ${expanded ? "fixed" : "relative"};
+  top: ${expanded ? "var(--space-6)" : "unset"};
+  bottom: ${expanded ? "var(--space-6)" : "unset"};
+  left: ${expanded ? "var(--space-6)" : "unset"};
+  right: ${expanded ? "var(--space-6)" : "unset"};
+  border: ${expanded ? "1px solid var(--colour-border)" : "none"};
+  border-radius: 4px;
+`
+);
 
 const space = 1000;
 
@@ -24,6 +34,7 @@ const rotate = (x, y, a, px, py) => {
 };
 
 const Map = ({ circuit, Position, DriverList, TimingData }) => {
+  const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState({});
   const [[minX, minY, widthX, widthY], setBounds] = useState([
     undefined,
@@ -109,11 +120,21 @@ const Map = ({ circuit, Position, DriverList, TimingData }) => {
   const hasData = !!Object.keys(data).length;
 
   return hasData ? (
-    <StyledMap>
+    <StyledMap expanded={expanded}>
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        style={{
+          position: "absolute",
+          top: "var(--space-3)",
+          right: "var(--space-3)",
+        }}
+      >
+        {expanded ? "↓" : "↑"}
+      </button>
       <svg
         viewBox={`${minX} ${minY} ${widthX} ${widthY}`}
         width="100%"
-        height="500px"
+        height={expanded ? "100%" : "500px"}
       >
         <path
           stroke="var(--colour-fg)"
