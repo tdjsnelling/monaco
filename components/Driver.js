@@ -40,7 +40,7 @@ const DriverItem = styled.div`
     padding: 0 var(--space-3);
     height: 46px;
     display: grid;
-    grid-template-columns: 21px 64px 64px 64px 21px 90px 80px 10px 45px auto;
+    grid-template-columns: 21px 64px 64px 64px 21px 90px 80px 22px 45px auto;
     grid-gap: var(--space-4);
     align-items: center;
     //border-left: 5px solid ${({ teamColour }) => teamColour};
@@ -231,8 +231,13 @@ const Driver = ({
             lineStats?.[lineStats?.length - 1]?.TimeDiffToFastest ||
             "—"}
         </span>
-        <span style={{ color: getTyreColour(currentStint?.Compound) }}>
-          {currentStint?.Compound[0] ?? "—"}
+        <span>
+          <span style={{ color: getTyreColour(currentStint?.Compound) }}>
+            {currentStint?.Compound[0] ?? "—"}
+          </span>
+          <br />
+          {currentStint?.TotalLaps}
+          {currentStint?.New === "false" && "*"}
         </span>
         <span>
           Lap {line.NumberOfLaps ?? "—"}
