@@ -12,6 +12,7 @@ const StyledMap = styled.div(
   right: ${expanded ? "var(--space-6)" : "unset"};
   border: ${expanded ? "1px solid var(--colour-border)" : "none"};
   border-radius: 4px;
+  user-select: none;
 `
 );
 
@@ -33,7 +34,31 @@ const rotate = (x, y, a, px, py) => {
   return [newX + px, (newY + py) * -1];
 };
 
-const Map = ({ circuit, Position, DriverList, TimingData }) => {
+const getTrackStatusColour = (status) => {
+  switch (status) {
+    case "2":
+    case "4":
+    case "6":
+    case "7":
+      return "yellow";
+    case "5":
+      return "red";
+    default:
+      return "var(--colour-fg)";
+  }
+};
+
+const sortDriverPosition = (Lines) => (a, b) => {
+  const [racingNumberA] = a;
+  const [racingNumberB] = b;
+
+  const driverA = Lines[racingNumberA];
+  const driverB = Lines[racingNumberB];
+
+  return Number(driverB.Position) - Number(driverA.Position);
+};
+
+const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState({});
   const [[minX, minY, widthX, widthY], setBounds] = useState([
@@ -79,7 +104,7 @@ const Map = ({ circuit, Position, DriverList, TimingData }) => {
 
         setBounds([cMinX, cMinY, cWidthX, cWidthY]);
 
-        const cStroke = (cWidthX + cWidthY) / 200;
+        const cStroke = (cWidthX + cWidthY) / 225;
         setStroke(cStroke);
 
         rawData.corners = rawData.corners.map((corner) => {
@@ -121,6 +146,16 @@ const Map = ({ circuit, Position, DriverList, TimingData }) => {
 
   return hasData ? (
     <StyledMap expanded={expanded}>
+      <p
+        style={{
+          color: getTrackStatusColour(TrackStatus.Status),
+          position: "absolute",
+          top: "var(--space-4)",
+          left: "var(--space-4)",
+        }}
+      >
+        {TrackStatus.Message}
+      </p>
       <button
         onClick={() => setExpanded((e) => !e)}
         style={{
@@ -137,7 +172,7 @@ const Map = ({ circuit, Position, DriverList, TimingData }) => {
         height={expanded ? "100%" : "500px"}
       >
         <path
-          stroke="var(--colour-fg)"
+          stroke={getTrackStatusColour(TrackStatus.Status)}
           strokeWidth={stroke}
           strokeLinejoin="round"
           fill="transparent"
@@ -159,48 +194,50 @@ const Map = ({ circuit, Position, DriverList, TimingData }) => {
             data.transformedPoints[0][1] + stroke / 2
           })`}
         />
-        {Object.entries(Position.Entries ?? {}).map(([racingNumber, pos]) => {
-          const driver = DriverList[racingNumber];
-          const timingData = TimingData.Lines[racingNumber];
-          const onTrack =
-            pos.Status === "OnTrack" &&
-            !timingData.KnockedOut &&
-            !timingData.Retired &&
-            !timingData.Stopped;
-          const [rx, ry] = rotate(
-            pos.X,
-            pos.Y,
-            data.rotation,
-            (Math.max(...data.x) - Math.min(...data.x)) / 2,
-            (Math.max(...data.y) - Math.min(...data.y)) / 2
-          );
-          const fontSize = stroke * 3;
-          return (
-            <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.5}>
-              <circle
-                cx={rx}
-                cy={ry}
-                r={(stroke * 1.5) / (onTrack ? 1 : 2)}
-                fill={`#${driver.TeamColour}`}
-                stroke="var(--colour-bg)"
-                strokeWidth={fontSize / 10}
-                style={{ transition: "200ms linear" }}
-              />
-              <text
-                x={rx + stroke * 1.5}
-                y={ry + stroke}
-                fill={`#${driver.TeamColour}`}
-                fontSize={fontSize}
-                fontWeight="bold"
-                stroke="var(--colour-bg)"
-                strokeWidth={fontSize / 30}
-                style={{ transition: "200ms linear" }}
-              >
-                {driver.Tla}
-              </text>
-            </g>
-          );
-        })}
+        {Object.entries(Position.Entries ?? {})
+          .sort(sortDriverPosition(TimingData.Lines))
+          .map(([racingNumber, pos]) => {
+            const driver = DriverList[racingNumber];
+            const timingData = TimingData.Lines[racingNumber];
+            const onTrack =
+              pos.Status === "OnTrack" &&
+              !timingData.KnockedOut &&
+              !timingData.Retired &&
+              !timingData.Stopped;
+            const [rx, ry] = rotate(
+              pos.X,
+              pos.Y,
+              data.rotation,
+              (Math.max(...data.x) - Math.min(...data.x)) / 2,
+              (Math.max(...data.y) - Math.min(...data.y)) / 2
+            );
+            const fontSize = stroke * 3;
+            return (
+              <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.5}>
+                <circle
+                  cx={rx}
+                  cy={ry}
+                  r={stroke * (onTrack ? 1.25 : 0.75)}
+                  fill={`#${driver.TeamColour}`}
+                  stroke="var(--colour-bg)"
+                  strokeWidth={fontSize / 10}
+                  style={{ transition: "200ms linear" }}
+                />
+                <text
+                  x={rx + stroke * 1.5}
+                  y={ry + stroke}
+                  fill={`#${driver.TeamColour}`}
+                  fontSize={fontSize}
+                  fontWeight="bold"
+                  stroke="var(--colour-bg)"
+                  strokeWidth={fontSize / 20}
+                  style={{ transition: "200ms linear" }}
+                >
+                  {driver.Tla}
+                </text>
+              </g>
+            );
+          })}
         {data.corners.map((corner) => {
           let string = `${corner.number}`;
           if (corner.letter) string = string + corner.letter;

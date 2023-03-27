@@ -262,6 +262,7 @@ export default function Home() {
           <div
             style={{
               display: "flex",
+              alignItems: "flex-start",
               justifyContent: "space-between",
               padding: "var(--space-3)",
               borderBottom: "1px solid var(--colour-border)",
@@ -271,6 +272,7 @@ export default function Home() {
             <div
               style={{
                 display: "flex",
+                alignItems: "flex-start",
               }}
             >
               {!!SessionInfo && (
@@ -304,6 +306,7 @@ export default function Home() {
             <div
               style={{
                 display: "flex",
+                alignItems: "flex-start",
               }}
             >
               <p style={{ marginRight: "var(--space-4)" }}>
@@ -464,6 +467,7 @@ export default function Home() {
               Position={Position.Position[Position.Position.length - 1]}
               DriverList={DriverList}
               TimingData={TimingData}
+              TrackStatus={TrackStatus}
             />
           </div>
 
