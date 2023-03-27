@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import moment from "moment";
 import ResponsiveTable from "@monaco/components/ResponsiveTable";
-import Driver from "@monaco/components/Driver";
+import Driver, { TableHeader } from "@monaco/components/Driver";
 import Radio from "@monaco/components/Radio";
 import Map from "@monaco/components/Map";
 import Input from "@monaco/components/Input";
@@ -400,6 +400,7 @@ export default function Home() {
                           borderRight: "1px solid var(--colour-border)",
                         }}
                       >
+                        <TableHeader />
                         {lines.slice(0, 10).map(([racingNumber, line]) => (
                           <Driver
                             key={`timing-data-${racingNumber}`}
@@ -413,6 +414,7 @@ export default function Home() {
                         ))}
                       </div>
                       <div>
+                        <TableHeader />
                         {lines
                           .slice(10, 20)
                           .map(([racingNumber, line], pos) => (

@@ -34,13 +34,15 @@ const getTyreColour = (compound) => {
   }
 };
 
+const gridCols = "21px 64px 64px 64px 21px 90px 80px 52px 45px auto";
+
 const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
   > div {
     padding: 0 var(--space-3);
     height: 46px;
     display: grid;
-    grid-template-columns: 21px 64px 64px 64px 21px 90px 80px 22px 45px auto;
+    grid-template-columns: ${gridCols};
     grid-gap: var(--space-4);
     align-items: center;
     //border-left: 5px solid ${({ teamColour }) => teamColour};
@@ -59,6 +61,30 @@ const ProgressBar = styled.span`
     transition: width 100ms linear;
   }
 `;
+
+export const TableHeader = () => (
+  <div
+    style={{
+      padding: "var(--space-2) var(--space-3)",
+      backgroundColor: "var(--colour-offset)",
+      borderTop: "1px solid var(--colour-border)",
+      display: "grid",
+      gridTemplateColumns: gridCols,
+      gridGap: "var(--space-4)",
+    }}
+  >
+    <p>POS</p>
+    <p style={{ textAlign: "right" }}>DRIVER</p>
+    <p>GEAR/RPM</p>
+    <p>SPD/PDL</p>
+    <p>DRS</p>
+    <p>TIME</p>
+    <p>GAP</p>
+    <p>TYRE</p>
+    <p>INFO</p>
+    <p>SECTORS</p>
+  </div>
+);
 
 const Driver = ({
   racingNumber,
@@ -213,7 +239,7 @@ const Driver = ({
           </span>
         </span>
         <span>
-          Gap{" "}
+          Int{" "}
           <span
             style={{
               color: line.IntervalToPositionAhead?.Catching
@@ -232,11 +258,12 @@ const Driver = ({
             "—"}
         </span>
         <span>
+          Cmp{" "}
           <span style={{ color: getTyreColour(currentStint?.Compound) }}>
             {currentStint?.Compound[0] ?? "—"}
           </span>
           <br />
-          {currentStint?.TotalLaps}
+          Age {currentStint?.TotalLaps}
           {currentStint?.New === "false" && "*"}
         </span>
         <span>
