@@ -122,6 +122,7 @@ const Driver = ({
       >
         <span>
           <span
+            title="Position"
             style={{
               color:
                 TimingStats.Lines[racingNumber]?.PersonalBestLapTime
@@ -134,7 +135,7 @@ const Driver = ({
           </span>
           <br />
           {!Number.isNaN(Number(appData?.GridPos)) && (
-            <span style={{ color: "grey" }}>
+            <span title="Position change" style={{ color: "grey" }}>
               {Number(appData.GridPos) >= Number(line.Position) && "+"}
               {Number(appData.GridPos) - Number(line.Position)}
             </span>
@@ -146,6 +147,7 @@ const Driver = ({
           }}
         >
           <span
+            title="Driver"
             style={{
               color: driver?.TeamColour ? `#${driver.TeamColour}` : undefined,
             }}
@@ -153,22 +155,25 @@ const Driver = ({
             {racingNumber} {driver?.Tla}
           </span>
           <br />
-          {line.KnockedOut
-            ? "OUT"
-            : line.Retired
-            ? "RETIRED"
-            : line.Stopped
-            ? "STOPPED"
-            : line.InPit
-            ? "PIT"
-            : line.PitOut
-            ? "PIT OUT"
-            : null}
+          <span title="Status">
+            {line.KnockedOut
+              ? "OUT"
+              : line.Retired
+              ? "RETIRED"
+              : line.Stopped
+              ? "STOPPED"
+              : line.InPit
+              ? "PIT"
+              : line.PitOut
+              ? "PIT OUT"
+              : null}
+          </span>
         </span>
         <span>
-          {carData["3"].toString()} {carData["0"].toString()}
+          <span title="Gear">{carData["3"].toString()}</span>{" "}
+          <span title="RPM">{carData["0"].toString()}</span>
           <br />
-          <ProgressBar>
+          <ProgressBar title="RPM">
             <span
               style={{
                 width: `${rpmPercent}%`,
@@ -178,9 +183,9 @@ const Driver = ({
           </ProgressBar>
         </span>
         <span>
-          {carData["2"].toString()} km/h
+          <span title="Speed">{carData["2"].toString()} km/h</span>
           <br />
-          <ProgressBar>
+          <ProgressBar title="Throttle %">
             <span
               style={{
                 width: `${throttlePercent}%`,
@@ -189,7 +194,7 @@ const Driver = ({
               }}
             />
           </ProgressBar>
-          <ProgressBar>
+          <ProgressBar title="Brake">
             <span
               style={{
                 width: brakeApplied ? "100%" : "0%",
@@ -200,6 +205,9 @@ const Driver = ({
           </ProgressBar>
         </span>
         <span
+          title={`DRS ${
+            drsEnabledValues.includes(carData["45"]) ? "active" : "inactive"
+          }`}
           style={{
             color: drsEnabledValues.includes(carData["45"])
               ? "limegreen"
@@ -209,67 +217,88 @@ const Driver = ({
           DRS
         </span>
         <span>
-          Lst{" "}
+          <span title="Last lap">
+            Lst{" "}
+            <span
+              style={{
+                color:
+                  line.LastLapTime?.Value && line.LastLapTime?.OverallFastest
+                    ? "magenta"
+                    : line.LastLapTime?.Value &&
+                      line.LastLapTime?.PersonalFastest
+                    ? "limegreen"
+                    : "var(--colour-fg)",
+              }}
+            >
+              {line.LastLapTime?.Value || "—"}
+            </span>
+          </span>
+          <br />
+          <span title="Best lap">
+            Bst{" "}
+            <span
+              style={{
+                color:
+                  line.BestLapTime?.Value &&
+                  (line.BestLapTime?.OverallFastest ||
+                    TimingStats.Lines[racingNumber]?.PersonalBestLapTime
+                      ?.Position === 1)
+                    ? "magenta"
+                    : "var(--colour-fg)",
+              }}
+            >
+              {line.BestLapTime?.Value || "—"}
+            </span>
+          </span>
+        </span>
+        <span>
           <span
-            style={{
-              color:
-                line.LastLapTime?.Value && line.LastLapTime?.OverallFastest
-                  ? "magenta"
-                  : line.LastLapTime?.Value && line.LastLapTime?.PersonalFastest
+            title={`Gap to car ahead${
+              line.IntervalToPositionAhead?.Catching ? " (catching)" : ""
+            }`}
+          >
+            Int{" "}
+            <span
+              style={{
+                color: line.IntervalToPositionAhead?.Catching
                   ? "limegreen"
                   : "var(--colour-fg)",
-            }}
-          >
-            {line.LastLapTime?.Value || "—"}
+              }}
+            >
+              {line.IntervalToPositionAhead?.Value ||
+                lineStats?.[lineStats?.length - 1]?.TimeDifftoPositionAhead ||
+                "—"}
+            </span>
           </span>
           <br />
-          Bst{" "}
-          <span
-            style={{
-              color:
-                line.BestLapTime?.Value &&
-                (line.BestLapTime?.OverallFastest ||
-                  TimingStats.Lines[racingNumber]?.PersonalBestLapTime
-                    ?.Position === 1)
-                  ? "magenta"
-                  : "var(--colour-fg)",
-            }}
-          >
-            {line.BestLapTime?.Value || "—"}
-          </span>
-        </span>
-        <span>
-          Int{" "}
-          <span
-            style={{
-              color: line.IntervalToPositionAhead?.Catching
-                ? "limegreen"
-                : "var(--colour-fg)",
-            }}
-          >
-            {line.IntervalToPositionAhead?.Value ||
-              lineStats?.[lineStats?.length - 1]?.TimeDifftoPositionAhead ||
+          <span title="Gap to leader">
+            Ldr{" "}
+            {line.GapToLeader ||
+              lineStats?.[lineStats?.length - 1]?.TimeDiffToFastest ||
               "—"}
           </span>
-          <br />
-          Ldr{" "}
-          {line.GapToLeader ||
-            lineStats?.[lineStats?.length - 1]?.TimeDiffToFastest ||
-            "—"}
         </span>
         <span>
-          Cmp{" "}
-          <span style={{ color: getTyreColour(currentStint?.Compound) }}>
-            {currentStint?.Compound[0] ?? "—"}
+          <span title="Type compound">
+            Cmp{" "}
+            <span style={{ color: getTyreColour(currentStint?.Compound) }}>
+              {currentStint?.Compound[0] ?? "—"}
+            </span>
           </span>
           <br />
-          Age {currentStint?.TotalLaps}
-          {currentStint?.New === "false" && "*"}
+          <span
+            title={`Tyre age${
+              currentStint?.New === "false" ? " (not fresh)" : ""
+            }`}
+          >
+            Age {currentStint?.TotalLaps}
+            {currentStint?.New === "false" && "*"}
+          </span>
         </span>
         <span>
-          Lap {line.NumberOfLaps ?? "—"}
+          <span title="Completed laps">Lap {line.NumberOfLaps ?? "—"}</span>
           <br />
-          Stp {line.NumberOfPitStops ?? "—"}
+          <span title="Pit stops">Stp {line.NumberOfPitStops ?? "—"}</span>
         </span>
         <span style={{ display: "flex" }}>
           {(Array.isArray(line.Sectors)
@@ -279,6 +308,7 @@ const Driver = ({
             return (
               <span
                 key={`timing-data-${racingNumber}-sector-${i}`}
+                title={`Sector ${i + 1}`}
                 style={{
                   marginRight: "var(--space-4)",
                 }}
