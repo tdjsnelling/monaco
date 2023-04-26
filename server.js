@@ -200,8 +200,7 @@ app.prepare().then(async () => {
         wss.emit("connection", ws, req);
       });
     } else if (pathname === "/_next/webpack-hmr") {
-      // pass to Next HMR?
-      socket.destroy();
+      // Don't destroy, needed for HMR
     } else {
       socket.destroy();
     }

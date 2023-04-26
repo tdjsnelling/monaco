@@ -387,7 +387,7 @@ export default function Home() {
               gridTemplateColumns: !TimingData ? "1fr" : undefined,
             }}
           >
-            {!!TimingData ? (
+            {!!TimingData && !!CarData ? (
               <>
                 {(() => {
                   const lines = Object.entries(TimingData.Lines).sort(
@@ -464,13 +464,26 @@ export default function Home() {
                 <strong>TRACK</strong>
               </p>
             </div>
-            <Map
-              circuit={SessionInfo.Meeting.Circuit.Key}
-              Position={Position.Position[Position.Position.length - 1]}
-              DriverList={DriverList}
-              TimingData={TimingData}
-              TrackStatus={TrackStatus}
-            />
+            {!!Position ? (
+              <Map
+                circuit={SessionInfo.Meeting.Circuit.Key}
+                Position={Position.Position[Position.Position.length - 1]}
+                DriverList={DriverList}
+                TimingData={TimingData}
+                TrackStatus={TrackStatus}
+              />
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "400px",
+                }}
+              >
+                <p>NO DATA YET</p>
+              </div>
+            )}
           </div>
 
           <div
