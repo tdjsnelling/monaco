@@ -18,11 +18,9 @@ const sortPosition = (a, b) => {
 };
 
 const sortUtc = (a, b) => {
-  const aDate = new Date(a.Utc);
-  const bDate = new Date(b.Utc);
-  if (aDate < bDate) return 1;
-  if (aDate > bDate) return -1;
-  return 0;
+  const aDate = moment.utc(a.Utc);
+  const bDate = moment.utc(b.Utc);
+  return bDate.diff(aDate);
 };
 
 const getFlagColour = (flag) => {
@@ -130,7 +128,6 @@ export default function Home() {
 
   const messageCount =
     Object.values(liveState?.RaceControlMessages?.Messages ?? []).length +
-    Object.values(liveState?.SessionData?.StatusSeries ?? []).length +
     Object.values(liveState?.TeamRadio?.Captures ?? []).length;
   useEffect(() => {
     if (messageCount > 0) new Audio("/notif.mp3").play();
@@ -240,7 +237,9 @@ export default function Home() {
               Math.max(
                 moment
                   .duration(ExtrapolatedClock.Remaining)
-                  .subtract(moment().diff(moment(ExtrapolatedClock.Utc)))
+                  .subtract(
+                    moment.utc().diff(moment.utc(ExtrapolatedClock.Utc))
+                  )
                   .asMilliseconds() + delayMs,
                 0
               )
@@ -310,7 +309,7 @@ export default function Home() {
               }}
             >
               <p style={{ marginRight: "var(--space-4)" }}>
-                Data updated: {moment(updated).format("HH:mm:ss.SSS")}
+                Data updated: {moment.utc(updated).format("HH:mm:ss.SSS")} UTC
               </p>
               <p style={{ color: "limegreen", marginRight: "var(--space-4)" }}>
                 CONNECTED
@@ -530,7 +529,7 @@ export default function Home() {
                           marginRight: "var(--space-4)",
                         }}
                       >
-                        {moment(event.Utc).format("HH:mm:ss")}
+                        {moment.utc(event.Utc).format("HH:mm:ss")}
                         {event.Lap && ` / Lap ${event.Lap}`}
                       </span>
                       {event.Category === "Flag" && (

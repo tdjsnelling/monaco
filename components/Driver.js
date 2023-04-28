@@ -58,7 +58,8 @@ const ProgressBar = styled.span`
   > span {
     display: block;
     height: 4px;
-    transition: width 100ms linear;
+    transition: width ${({ noTransition }) => (noTransition ? "100ms" : "1s")}
+      linear;
   }
 `;
 
@@ -194,7 +195,7 @@ const Driver = ({
               }}
             />
           </ProgressBar>
-          <ProgressBar title="Brake">
+          <ProgressBar title="Brake" noTransition>
             <span
               style={{
                 width: brakeApplied ? "100%" : "0%",

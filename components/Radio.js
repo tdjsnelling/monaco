@@ -59,7 +59,7 @@ const Radio = ({ radio, path, driver }) => {
           marginRight: "var(--space-4)",
         }}
       >
-        {moment(radio.Utc).format("HH:mm:ss")}
+        {moment.utc(radio.Utc).format("HH:mm:ss")}
       </span>
       <span
         style={{
