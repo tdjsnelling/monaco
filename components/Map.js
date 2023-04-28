@@ -211,6 +211,7 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
               (Math.max(...data.x) - Math.min(...data.x)) / 2,
               (Math.max(...data.y) - Math.min(...data.y)) / 2
             );
+            console.log(driver);
             const fontSize = stroke * 3;
             return (
               <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.5}>
@@ -218,20 +219,33 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
                   cx={rx}
                   cy={ry}
                   r={stroke * (onTrack ? 1.25 : 0.75)}
-                  fill={`#${driver.TeamColour}`}
+                  fill={
+                    driver?.TeamColour
+                      ? `#${driver.TeamColour}`
+                      : "var(--colour-fg)"
+                  }
                   stroke="var(--colour-bg)"
                   strokeWidth={fontSize / 10}
-                  style={{ transition: "200ms linear" }}
+                  style={{ transition: "1s linear" }}
                 />
                 <text
-                  x={rx + stroke * 1.5}
-                  y={ry + stroke}
-                  fill={`#${driver.TeamColour}`}
+                  x={0}
+                  y={0}
+                  fill={
+                    driver?.TeamColour
+                      ? `#${driver.TeamColour}`
+                      : "var(--colour-fg)"
+                  }
                   fontSize={fontSize}
                   fontWeight="bold"
                   stroke="var(--colour-bg)"
                   strokeWidth={fontSize / 20}
-                  style={{ transition: "200ms linear" }}
+                  style={{
+                    transform: `translate(${rx + stroke * 1.5}px, ${
+                      ry + stroke
+                    }px)`,
+                    transition: "1s linear",
+                  }}
                 >
                   {driver.Tla}
                 </text>
