@@ -39,6 +39,24 @@ const getFlagColour = (flag) => {
   }
 };
 
+const getWeatherUnit = (key) => {
+  switch (key) {
+    case "AirTemp":
+    case "TrackTemp":
+      return "°C";
+    case "Humidity":
+      return "%";
+    case "Pressure":
+      return " mbar";
+    case "WindDirection":
+      return "°";
+    case "WindSpeed":
+      return " km/h";
+    default:
+      return null;
+  }
+};
+
 export default function Home() {
   const [connected, setConnected] = useState(false);
   const [liveState, setLiveState] = useState({});
@@ -363,6 +381,7 @@ export default function Home() {
                     style={{ marginRight: "var(--space-4)" }}
                   >
                     {k}: {v}
+                    {getWeatherUnit(k)}
                   </p>
                 ) : null
               )}

@@ -199,11 +199,9 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
           .map(([racingNumber, pos]) => {
             const driver = DriverList[racingNumber];
             const timingData = TimingData.Lines[racingNumber];
-            const onTrack =
-              pos.Status === "OnTrack" &&
-              !timingData.KnockedOut &&
-              !timingData.Retired &&
-              !timingData.Stopped;
+            const onTrack = pos.Status === "OnTrack";
+            const out =
+              timingData.KnockedOut || timingData.Retired || timingData.Stopped;
             const [rx, ry] = rotate(
               pos.X,
               pos.Y,
@@ -211,9 +209,8 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
               (Math.max(...data.x) - Math.min(...data.x)) / 2,
               (Math.max(...data.y) - Math.min(...data.y)) / 2
             );
-            console.log(driver);
             const fontSize = stroke * 3;
-            return (
+            return !out ? (
               <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.5}>
                 <circle
                   cx={rx}
@@ -250,7 +247,7 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
                   {driver.Tla}
                 </text>
               </g>
-            );
+            ) : null;
           })}
         {data.corners.map((corner) => {
           let string = `${corner.number}`;
