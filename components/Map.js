@@ -55,7 +55,7 @@ const sortDriverPosition = (Lines) => (a, b) => {
   const driverA = Lines[racingNumberA];
   const driverB = Lines[racingNumberB];
 
-  return Number(driverB.Position) - Number(driverA.Position);
+  return Number(driverB?.Position) - Number(driverA?.Position);
 };
 
 const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
@@ -201,7 +201,9 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
             const timingData = TimingData.Lines[racingNumber];
             const onTrack = pos.Status === "OnTrack";
             const out =
-              timingData.KnockedOut || timingData.Retired || timingData.Stopped;
+              timingData?.KnockedOut ||
+              timingData?.Retired ||
+              timingData?.Stopped;
             const [rx, ry] = rotate(
               pos.X,
               pos.Y,
@@ -210,7 +212,7 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
               (Math.max(...data.y) - Math.min(...data.y)) / 2
             );
             const fontSize = stroke * 3;
-            return !out ? (
+            return driver && !out ? (
               <g key={`pos-${racingNumber}`} opacity={onTrack ? 1 : 0.5}>
                 <circle
                   cx={rx}
