@@ -75,14 +75,13 @@ const Radio = ({ radio, path, driver }) => {
       <button
         onClick={() => setPlaying((p) => !p)}
         style={{
+          display: "inline-flex",
+          alignItems: "center",
           background: `linear-gradient(to right, var(--colour-border) ${percent}%, var(--colour-bg) ${percent}%)`,
           padding: "var(--space-1) var(--space-3)",
           marginRight: "var(--space-4)",
         }}
       >
-        <span style={{ fontSize: "14px" }}>
-          {playing ? <>&#x23f8;</> : <>&#x23f5;</>}
-        </span>{" "}
         {secondsToMinutes(progress)} / {secondsToMinutes(duration)}
       </button>
       <audio

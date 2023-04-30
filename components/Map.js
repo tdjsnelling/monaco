@@ -71,14 +71,11 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch(
-        `https://api.multiviewer.app/api/v1/circuits/${circuit}/${new Date().getFullYear()}`,
-        {
-          headers: {
-            "User-Agent": "tdjsnelling/monaco",
-          },
-        }
-      );
+      const res = await fetch(`/api/map?circuit=${circuit}`, {
+        headers: {
+          "User-Agent": "tdjsnelling/monaco",
+        },
+      });
       if (res.status === 200) {
         const rawData = await res.json();
 

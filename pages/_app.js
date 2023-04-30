@@ -40,6 +40,9 @@ const GlobalStyle = createGlobalStyle`
     font-family: var(--fontFamily-body);
     cursor: pointer;
   }
+  strong {
+    font-size: var(--fontSize-body);
+  }
 `;
 
 export default function App({ Component, pageProps }) {
