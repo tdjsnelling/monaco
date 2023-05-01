@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import styled from "styled-components";
+import { transparentize } from "polished";
 
 const drsEnabledValues = [10, 12, 14];
 
@@ -38,6 +40,10 @@ const gridCols = "21px 64px 64px 64px 21px 90px 90px 52px 45px auto";
 
 const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
+  background-color: ${({ posChanged, teamColour }) =>
+    posChanged ? transparentize(0.8, teamColour) : "transparent"};
+  transition: background-color 300ms;
+
   > div {
     padding: 0 var(--space-3);
     height: 46px;
@@ -45,7 +51,6 @@ const DriverItem = styled.div`
     grid-template-columns: ${gridCols};
     grid-gap: var(--space-4);
     align-items: center;
-    //border-left: 5px solid ${({ teamColour }) => teamColour};
   }
 `;
 
@@ -87,6 +92,12 @@ export const TableHeader = () => (
   </div>
 );
 
+const getPosChangeColour = (pos, gridPos) => {
+  if (pos < gridPos) return "limegreen";
+  if (pos > gridPos) return "red";
+  return "grey";
+};
+
 const Driver = ({
   racingNumber,
   line,
@@ -112,9 +123,18 @@ const Driver = ({
 
   const lineStats = Object.values(line.Stats ?? {});
 
+  const [posChanged, setPosChanged] = useState(false);
+  useEffect(() => {
+    setPosChanged(true);
+    setTimeout(() => {
+      setPosChanged(false);
+    }, 1000);
+  }, [line.Position]);
+
   return (
     <DriverItem
       teamColour={driver?.TeamColour ? `#${driver.TeamColour}` : undefined}
+      posChanged={posChanged}
     >
       <div
         style={{
@@ -136,7 +156,15 @@ const Driver = ({
           </span>
           <br />
           {!Number.isNaN(Number(appData?.GridPos)) && (
-            <span title="Position change" style={{ color: "grey" }}>
+            <span
+              title="Position change"
+              style={{
+                color: getPosChangeColour(
+                  Number(line.Position),
+                  Number(appData.GridPos)
+                ),
+              }}
+            >
               {Number(appData.GridPos) >= Number(line.Position) && "+"}
               {Number(appData.GridPos) - Number(line.Position)}
             </span>
