@@ -645,6 +645,13 @@ export default function Home() {
             )}
           </div>
         </ResponsiveTable>
+        <p
+          style={{ color: "grey", padding: "var(--space-3)", fontSize: "11px" }}
+        >
+          f1.tdjs.tech is not associated in any way with Formula 1 or any other
+          Formula 1 companies. All data used is publicly available and used in a
+          non-commercial, fair use manner.
+        </p>
       </main>
     </>
   );

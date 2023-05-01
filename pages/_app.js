@@ -23,6 +23,7 @@ const GlobalStyle = createGlobalStyle`
     padding: 0;
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   body {
     background-color: var(--colour-bg);

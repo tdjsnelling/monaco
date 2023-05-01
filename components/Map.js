@@ -13,6 +13,7 @@ const StyledMap = styled.div(
   border: ${expanded ? "1px solid var(--colour-border)" : "none"};
   border-radius: 4px;
   user-select: none;
+  box-shadow: ${expanded ? "0 0 0 1000px rgba(0, 0, 0, 0.75)" : "none"}
 `
 );
 
@@ -114,8 +115,8 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
           );
 
           const transformedLabel = rotate(
-            corner.trackPosition.x + 5 * cStroke * Math.cos(rad(corner.angle)),
-            corner.trackPosition.y + 5 * cStroke * Math.sin(rad(corner.angle)),
+            corner.trackPosition.x + 4 * cStroke * Math.cos(rad(corner.angle)),
+            corner.trackPosition.y + 4 * cStroke * Math.sin(rad(corner.angle)),
             rawData.rotation,
             px,
             py
@@ -196,7 +197,9 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
           .map(([racingNumber, pos]) => {
             const driver = DriverList[racingNumber];
             const timingData = TimingData.Lines[racingNumber];
-            const onTrack = pos.Status === "OnTrack";
+            const onTrack =
+              pos.Status === "OnTrack" &&
+              (timingData ? !timingData.InPit : true);
             const out =
               timingData?.KnockedOut ||
               timingData?.Retired ||

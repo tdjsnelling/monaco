@@ -34,7 +34,7 @@ const getTyreColour = (compound) => {
   }
 };
 
-const gridCols = "21px 64px 64px 64px 21px 90px 80px 52px 45px auto";
+const gridCols = "21px 64px 64px 64px 21px 90px 90px 52px 45px auto";
 
 const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
@@ -58,8 +58,8 @@ const ProgressBar = styled.span`
   > span {
     display: block;
     height: 4px;
-    transition: width ${({ noTransition }) => (noTransition ? "100ms" : "1s")}
-      linear;
+    transition: width 100ms linear;
+    pointer-events: none;
   }
 `;
 
@@ -195,7 +195,7 @@ const Driver = ({
               }}
             />
           </ProgressBar>
-          <ProgressBar title="Brake" noTransition>
+          <ProgressBar title="Brake">
             <span
               style={{
                 width: brakeApplied ? "100%" : "0%",
@@ -280,7 +280,7 @@ const Driver = ({
           </span>
         </span>
         <span>
-          <span title="Type compound">
+          <span title="Tyre compound">
             Cmp{" "}
             <span style={{ color: getTyreColour(currentStint?.Compound) }}>
               {currentStint?.Compound[0] ?? "—"}
