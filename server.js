@@ -140,6 +140,8 @@ const setupStream = async (wss) => {
               "LapCount",
               "TimingData",
               "TeamRadio",
+              "LapSeries",
+              "TyreStintSeries",
             ],
           ],
           I: 1,

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import moment from "moment";
 import ResponsiveTable from "@monaco/components/ResponsiveTable";
 import Driver, { TableHeader } from "@monaco/components/Driver";
@@ -56,6 +57,10 @@ const getWeatherUnit = (key) => {
       return null;
   }
 };
+
+const PositionChart = dynamic(() => import("../components/PositionChart"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [connected, setConnected] = useState(false);
@@ -219,6 +224,7 @@ export default function Home() {
     CarData,
     Position,
     TeamRadio,
+    LapSeries,
   } = liveState;
 
   if (!Heartbeat)
@@ -645,8 +651,22 @@ export default function Home() {
             )}
           </div>
         </ResponsiveTable>
+
+        <ResponsiveTable>
+          <PositionChart
+            LapSeries={LapSeries}
+            DriverList={DriverList}
+            TotalLaps={LapCount?.TotalLaps}
+          />
+        </ResponsiveTable>
+
         <p
-          style={{ color: "grey", padding: "var(--space-3)", fontSize: "11px" }}
+          style={{
+            color: "grey",
+            padding: "var(--space-3)",
+            fontSize: "11px",
+            borderTop: "1px solid var(--colour-border)",
+          }}
         >
           f1.tdjs.tech is not associated in any way with Formula 1 or any other
           Formula 1 companies. All data displayed is publicly available and used
