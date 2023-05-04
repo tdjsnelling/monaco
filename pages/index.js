@@ -113,6 +113,12 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/worker.js");
+    }
+  }, []);
+
+  useEffect(() => {
     setLiveState({});
     setBlocking(false);
     initWebsocket((data) => {
@@ -149,7 +155,11 @@ export default function Home() {
     Object.values(liveState?.RaceControlMessages?.Messages ?? []).length +
     Object.values(liveState?.TeamRadio?.Captures ?? []).length;
   useEffect(() => {
-    if (messageCount > 0) new Audio("/notif.mp3").play();
+    if (messageCount > 0) {
+      try {
+        new Audio("/notif.mp3").play();
+      } catch (e) {}
+    }
   }, [messageCount]);
 
   if (!connected)

@@ -50,6 +50,7 @@ export default class MyDocument extends Document {
             rel="icon"
             media="(prefers-color-scheme: dark)"
           />
+          <link rel="manifest" href="/manifest.json" />
         </Head>
         <body>
           <Main />
