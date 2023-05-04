@@ -36,7 +36,8 @@ const getTyreColour = (compound) => {
   }
 };
 
-const gridCols = "21px 64px 64px 64px 21px 90px 90px 52px 45px auto";
+const gridCols = "21px 52px 64px 64px 21px 90px 90px 52px 45px auto";
+const gridColsSmall = "18px 42px 60px 60px 18px 74px 74px 44px 38px auto";
 
 const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
@@ -48,9 +49,14 @@ const DriverItem = styled.div`
     padding: 0 var(--space-3);
     height: 46px;
     display: grid;
-    grid-template-columns: ${gridCols};
-    grid-gap: var(--space-4);
+    grid-template-columns: ${gridColsSmall};
+    grid-gap: var(--space-3);
     align-items: center;
+
+    @media screen and (min-width: 900px) {
+      grid-template-columns: ${gridCols};
+      grid-gap: var(--space-4);
+    }
   }
 `;
 
@@ -68,17 +74,22 @@ const ProgressBar = styled.span`
   }
 `;
 
+const StyledTableHeader = styled.div`
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--colour-offset);
+  border-top: 1px solid var(--colour-border);
+  display: grid;
+  grid-template-columns: ${gridColsSmall};
+  grid-gap: var(--space-3);
+
+  @media screen and (min-width: 900px) {
+    grid-template-columns: ${gridCols};
+    grid-gap: var(--space-4);
+  }
+`;
+
 export const TableHeader = () => (
-  <div
-    style={{
-      padding: "var(--space-2) var(--space-3)",
-      backgroundColor: "var(--colour-offset)",
-      borderTop: "1px solid var(--colour-border)",
-      display: "grid",
-      gridTemplateColumns: gridCols,
-      gridGap: "var(--space-4)",
-    }}
-  >
+  <StyledTableHeader>
     <p>POS</p>
     <p style={{ textAlign: "right" }}>DRIVER</p>
     <p>GEAR/RPM</p>
@@ -89,7 +100,7 @@ export const TableHeader = () => (
     <p>TYRE</p>
     <p>INFO</p>
     <p>SECTORS</p>
-  </div>
+  </StyledTableHeader>
 );
 
 const getPosChangeColour = (pos, gridPos) => {

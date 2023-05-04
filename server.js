@@ -128,7 +128,6 @@ const setupStream = async (wss) => {
               "CarData.z",
               "Position.z",
               "ExtrapolatedClock",
-              "TopThree",
               "TimingStats",
               "TimingAppData",
               "WeatherData",

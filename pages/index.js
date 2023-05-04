@@ -6,6 +6,7 @@ import Driver, { TableHeader } from "@monaco/components/Driver";
 import Radio from "@monaco/components/Radio";
 import Map from "@monaco/components/Map";
 import Input from "@monaco/components/Input";
+import SpeedTrap, { speedTrapColumns } from "@monaco/components/SpeedTrap";
 
 const f1Url = "https://livetiming.formula1.com";
 
@@ -645,6 +646,70 @@ export default function Home() {
             )}
           </div>
         </ResponsiveTable>
+
+        <ResponsiveTable
+          style={{
+            borderBottom: "1px solid var(--colour-border)",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              borderRight: "1px solid var(--colour-border)",
+            }}
+          >
+            <div
+              style={{
+                padding: "var(--space-2) var(--space-3)",
+                backgroundColor: "var(--colour-offset)",
+                borderBottom: "1px solid var(--colour-border)",
+              }}
+            >
+              <p>
+                <strong>SPEED TRAP DATA</strong>
+              </p>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: speedTrapColumns,
+                padding: "var(--space-2) 24px var(--space-2) var(--space-3)",
+                backgroundColor: "var(--colour-offset)",
+              }}
+            >
+              <p>DRIVER</p>
+              <p>SECTOR 1</p>
+              <p>SECTOR 2</p>
+              <p>FINISH LINE</p>
+              <p>SPEED TRAP</p>
+            </div>
+            {!!TimingData && !!DriverList && (
+              <ul
+                style={{
+                  listStyle: "none",
+                  height: "200px",
+                  overflow: "auto",
+                  flexGrow: 1,
+                }}
+              >
+                {Object.entries(TimingData.Lines)
+                  .sort(sortPosition)
+                  .map(([racingNumber, line]) => (
+                    <SpeedTrap
+                      key={`speed-trap-${racingNumber}`}
+                      racingNumber={racingNumber}
+                      driver={DriverList[racingNumber]}
+                      line={line}
+                      statsLine={TimingStats.Lines[racingNumber]}
+                    />
+                  ))}
+              </ul>
+            )}
+          </div>
+        </ResponsiveTable>
+
         <p
           style={{ color: "grey", padding: "var(--space-3)", fontSize: "11px" }}
         >

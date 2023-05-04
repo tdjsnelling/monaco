@@ -15,6 +15,7 @@ const GlobalStyle = createGlobalStyle`
     --colour-border: #555;
     --colour-offset: #222;
     
+    --fontSize-small: 10px;
     --fontSize-body: 12px;
     --fontFamily-body: 'JetBrains Mono', monospace;
   }
@@ -29,7 +30,12 @@ const GlobalStyle = createGlobalStyle`
     background-color: var(--colour-bg);
     color: var(--colour-fg);
     font-family: var(--fontFamily-body);
-    font-size: var(--fontSize-body);
+    font-size: var(--fontSize-small);
+    -webkit-text-size-adjust: 100%;
+    
+    @media screen and (min-width: 900px) {
+      font-size: var(--fontSize-body);
+    }
   }
   button {
     appearance: none;
@@ -37,12 +43,13 @@ const GlobalStyle = createGlobalStyle`
     color: var(--colour-fg);
     border: 1px solid var(--colour-fg);
     padding: var(--space-2) var(--space-3);
-    font-size: var(--fontSize-body);
+    font-size: var(--fontSize-small);
     font-family: var(--fontFamily-body);
     cursor: pointer;
-  }
-  strong {
-    font-size: var(--fontSize-body);
+
+    @media screen and (min-width: 900px) {
+      font-size: var(--fontSize-body);
+    }
   }
 `;
 

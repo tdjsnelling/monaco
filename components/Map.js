@@ -4,12 +4,12 @@ import styled from "styled-components";
 const StyledMap = styled.div(
   ({ expanded }) => `
   background-color: var(--colour-bg);
-  padding: ${expanded ? "var(--space-6)" : "var(--space-4)"};
+  padding: var(--space-4);
   position: ${expanded ? "fixed" : "relative"};
-  top: ${expanded ? "var(--space-6)" : "unset"};
-  bottom: ${expanded ? "var(--space-6)" : "unset"};
-  left: ${expanded ? "var(--space-6)" : "unset"};
-  right: ${expanded ? "var(--space-6)" : "unset"};
+  top: ${expanded ? "var(--space-4)" : "unset"};
+  bottom: ${expanded ? "var(--space-4)" : "unset"};
+  left: ${expanded ? "var(--space-4)" : "unset"};
+  right: ${expanded ? "var(--space-4)" : "unset"};
   border: ${expanded ? "1px solid var(--colour-border)" : "none"};
   border-radius: 4px;
   user-select: none;
