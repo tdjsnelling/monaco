@@ -38,6 +38,30 @@ const deepObjectMerge = (original = {}, modifier) => {
 const parseCompressed = (data) =>
   JSON.parse(zlib.inflateRawSync(Buffer.from(data, "base64")).toString());
 
+const updateLapTimeSeries = (data) => {
+  const { Lines } = data;
+
+  const lapTimeSeries = state.LapTimeSeries ?? {};
+
+  for (const line of Object.entries(Lines)) {
+    const [racingNumber, driverData] = line;
+
+    if (
+      lapTimeSeries?.[driverData.NumberOfLaps]?.[racingNumber] === undefined
+    ) {
+      if (!lapTimeSeries[driverData.NumberOfLaps])
+        lapTimeSeries[driverData.NumberOfLaps] = {};
+
+      lapTimeSeries[driverData.NumberOfLaps][racingNumber] = {
+        lap: driverData.LastLapTime.Value,
+        sectors: driverData.Sectors.map((sector) => sector.PreviousValue),
+      };
+    }
+  }
+
+  return lapTimeSeries;
+};
+
 const updateState = (data) => {
   try {
     const parsed = JSON.parse(data.toString());
@@ -63,7 +87,12 @@ const updateState = (data) => {
             value = parseCompressed(value);
           }
 
-          state = deepObjectMerge(state, { [field]: value });
+          let LapTimeSeries = {};
+          if (field === "TimingData") {
+            LapTimeSeries = updateLapTimeSeries(value);
+          }
+
+          state = deepObjectMerge(state, { [field]: value, LapTimeSeries });
         }
       }
     } else if (Object.keys(parsed.R ?? {}).length && parsed.I === "1") {
@@ -75,10 +104,14 @@ const updateState = (data) => {
       if (parsed.R["Position.z"])
         parsed.R["Position"] = parseCompressed(parsed.R["Position.z"]);
 
+      if (parsed.R["TimingData"])
+        parsed.R["LapTimeSeries"] = updateLapTimeSeries(parsed.R["TimingData"]);
+
       state = deepObjectMerge(state, parsed.R);
     }
   } catch (e) {
-    console.error(`could not update data: ${e}`);
+    //console.error(`could not update data:`);
+    console.error(e);
   }
 };
 
