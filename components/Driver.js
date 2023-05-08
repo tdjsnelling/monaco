@@ -41,8 +41,8 @@ const gridColsSmall = "18px 42px 60px 60px 18px 74px 74px 44px 38px auto";
 
 const DriverItem = styled.div`
   border-bottom: 1px solid var(--colour-border);
-  background-color: ${({ posChanged, teamColour }) =>
-    posChanged ? transparentize(0.8, teamColour) : "transparent"};
+  background-color: ${({ posChanged }) =>
+    posChanged ? transparentize(0.8, posChanged) : "transparent"};
   transition: background-color 300ms;
 
   > div {
@@ -134,12 +134,18 @@ const Driver = ({
 
   const lineStats = Object.values(line.Stats ?? {});
 
-  const [posChanged, setPosChanged] = useState(false);
+  const [posChanged, setPosChanged] = useState();
+  const [prevPos, setPrevPos] = useState();
   useEffect(() => {
-    setPosChanged(true);
-    setTimeout(() => {
-      setPosChanged(false);
-    }, 1000);
+    const pos = Number(line.Position);
+    if (prevPos !== undefined && pos !== prevPos) {
+      setPosChanged(getPosChangeColour(pos, prevPos));
+      setTimeout(() => {
+        setPosChanged(undefined);
+      }, 2000);
+    }
+
+    setPrevPos(pos);
   }, [line.Position]);
 
   return (
