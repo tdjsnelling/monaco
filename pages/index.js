@@ -500,6 +500,7 @@ export default function Home() {
                 DriverList={DriverList}
                 TimingData={TimingData}
                 TrackStatus={TrackStatus}
+                WindDirection={WeatherData.WindDirection}
               />
             ) : (
               <div

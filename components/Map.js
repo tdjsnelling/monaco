@@ -59,7 +59,19 @@ const sortDriverPosition = (Lines) => (a, b) => {
   return Number(driverB?.Position) - Number(driverA?.Position);
 };
 
-const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
+const bearingToCardinal = (bearing) => {
+  const cardinalDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return cardinalDirections[Math.floor(bearing / 45) % 8];
+};
+
+const Map = ({
+  circuit,
+  Position,
+  DriverList,
+  TimingData,
+  TrackStatus,
+  WindDirection,
+}) => {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState({});
   const [[minX, minY, widthX, widthY], setBounds] = useState([
@@ -152,7 +164,45 @@ const Map = ({ circuit, Position, DriverList, TimingData, TrackStatus }) => {
           left: "var(--space-4)",
         }}
       >
-        {TrackStatus.Message}
+        Status: {TrackStatus.Message}
+      </p>
+      <p
+        style={{
+          color: getTrackStatusColour(TrackStatus.Status),
+          position: "absolute",
+          top: "calc(var(--space-4) + 20px)",
+          left: "var(--space-4)",
+        }}
+      >
+        N
+        <span
+          style={{
+            display: "inline-block",
+            marginLeft: "var(--space-2)",
+            transform: `rotate(${-data.rotation}deg)`,
+          }}
+        >
+          ↑
+        </span>
+      </p>
+      <p
+        style={{
+          color: getTrackStatusColour(TrackStatus.Status),
+          position: "absolute",
+          top: "calc(var(--space-4) + 40px)",
+          left: "var(--space-4)",
+        }}
+      >
+        Wind {bearingToCardinal(Number(WindDirection))}
+        <span
+          style={{
+            display: "inline-block",
+            marginLeft: "var(--space-2)",
+            transform: `rotate(${(WindDirection - data.rotation) % 360}deg)`,
+          }}
+        >
+          ↑
+        </span>
       </p>
       <button
         onClick={() => setExpanded((e) => !e)}
