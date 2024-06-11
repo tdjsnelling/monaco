@@ -13,7 +13,7 @@ const handle = app.getRequestHandler();
 const signalrUrl = "livetiming.formula1.com/signalr";
 const signalrHub = "Streaming";
 
-const socketFreq = 250;
+const socketFreq = 1000;
 const retryFreq = 10000;
 
 let state = {};
