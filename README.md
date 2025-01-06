@@ -2,9 +2,9 @@
 
 Monaco is an open-source Formula 1 live timing dashboard
 
-[f1.tdjs.tech](https://f1.tdjs.tech)
+[f1.tdjs.dev](https://f1.tdjs.dev)
 
-![Monaco screenshot](https://tdjs.tech/images/content/monaco.png)
+![Monaco screenshot](https://tdjs.dev/images/content/monaco.png)
 
 ## Development
 

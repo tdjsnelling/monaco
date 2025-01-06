@@ -724,7 +724,7 @@ export default function Home() {
         <p
           style={{ color: "grey", padding: "var(--space-3)", fontSize: "11px" }}
         >
-          f1.tdjs.tech is not associated in any way with Formula 1 or any other
+          f1.tdjs.dev is not associated in any way with Formula 1 or any other
           Formula 1 companies. All data displayed is publicly available and used
           in a non-commercial, fair use setting. Map data provided by
           api.multiviewer.app.
